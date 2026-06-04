@@ -1,0 +1,14 @@
+{
+  "name": "soccer-profile-h5",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:questions": "node scripts/build-questions.js",
+    "sync:data": "cp data/questions.json data/copy_pack.json data/archetype_prototypes.json cloudfunctions/calculateReport/data/ && cp data/questions.json public/data/",
+    "deploy": "npm run sync:data && echo y | tcb fn deploy calculateReport --dir cloudfunctions/calculateReport -e cloud1-3ghh3b2jd73d087e --force && tcb hosting deploy public / -e cloud1-3ghh3b2jd73d087e",
+    "serve": "npx --yes serve public -l 5173"
+  },
+  "devDependencies": {
+    "@cloudbase/cli": "^2.6.0"
+  }
+}

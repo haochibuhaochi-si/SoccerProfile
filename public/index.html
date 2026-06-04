@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0a0e17" />
+  <title>足球风格与竞技水准测试</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Step 1: Welcome -->
+    <section id="step-welcome" class="step active">
+      <div class="welcome-hero">
+        <div class="logo-mark">⚽</div>
+        <h1>足球 DNA</h1>
+        <p class="slogan">45 道题，读懂你的球风、强度与战术素养</p>
+        <ul class="feature-list">
+          <li>13 种 Archetype 原型匹配</li>
+          <li>PlayLevel 竞技强度评分</li>
+          <li>个性化训练与风格参照</li>
+        </ul>
+      </div>
+      <button type="button" class="btn btn-primary" id="btn-start">开始测试</button>
+      <p class="footnote">约 8–12 分钟 · 移动端优先</p>
+    </section>
+
+    <!-- Step 2: Quiz -->
+    <section id="step-quiz" class="step">
+      <header class="quiz-header">
+        <div class="progress-wrap">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <span class="progress-text" id="progress-text">1 / 46</span>
+      </header>
+      <div class="quiz-body">
+        <span class="part-badge" id="part-badge">基本信息</span>
+        <h2 class="question-title" id="question-title"></h2>
+        <p class="question-hint" id="question-hint"></p>
+        <div class="options" id="options"></div>
+      </div>
+      <footer class="quiz-footer">
+        <button type="button" class="btn btn-ghost" id="btn-prev" disabled>上一题</button>
+        <button type="button" class="btn btn-primary" id="btn-next">下一题</button>
+      </footer>
+    </section>
+
+    <!-- Step 3: Loading -->
+    <section id="step-loading" class="step">
+      <div class="loader-ring"></div>
+      <p class="loading-msg" id="loading-msg">正在分析你的球风...</p>
+    </section>
+
+    <!-- Step 4: Paywall -->
+    <section id="step-paywall" class="step">
+      <div class="paywall-preview blurred" id="paywall-preview">
+        <div class="preview-chip">Archetype 已匹配</div>
+        <h3 id="preview-title">创意型全能中场</h3>
+        <p id="preview-score">PlayLevel · 5.8</p>
+      </div>
+      <div class="paywall-card">
+        <h2>解锁完整报告</h2>
+        <p>含雷达图、深度解析、强度分析、训练建议与风格参照系</p>
+        <div class="price-row">
+          <span class="price">¥9.9</span>
+          <span class="price-note">一次解锁 · 永久查看</span>
+        </div>
+        <button type="button" class="btn btn-primary" id="btn-unlock">解锁我的报告</button>
+        <button type="button" class="btn btn-ghost" id="btn-ad-unlock">观看广告免费解锁（演示）</button>
+      </div>
+    </section>
+
+    <!-- Step 5: Report -->
+    <section id="step-report" class="step">
+      <header class="report-header">
+        <p class="report-label">你的足球 DNA</p>
+        <h1 id="report-title"></h1>
+        <p class="report-tagline" id="report-tagline"></p>
+        <div class="badge-row">
+          <span class="badge intensity" id="badge-intensity"></span>
+          <span class="badge literacy" id="badge-literacy"></span>
+        </div>
+        <div class="playlevel-box">
+          <span class="playlevel-label">PlayLevel</span>
+          <span class="playlevel-value" id="playlevel-value">0</span>
+        </div>
+      </header>
+
+      <section class="report-block">
+        <h3>风格雷达</h3>
+        <canvas id="radar-canvas" width="320" height="280"></canvas>
+      </section>
+
+      <section class="report-block">
+        <h3>核心解析</h3>
+        <p id="report-description"></p>
+        <div class="two-col">
+          <div>
+            <h4>优势</h4>
+            <ul id="report-strengths"></ul>
+          </div>
+          <div>
+            <h4>短板</h4>
+            <ul id="report-weaknesses"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="report-block">
+        <h3>竞技强度分析</h3>
+        <p id="report-intensity-tone"></p>
+      </section>
+
+      <section class="report-block">
+        <h3>训练建议</h3>
+        <ol id="report-training"></ol>
+        <p class="formation-fit" id="report-formation"></p>
+      </section>
+
+      <section class="report-block style-ref-block">
+        <h3>风格参照系</h3>
+        <p class="disclaimer" id="report-disclaimer"></p>
+        <p id="report-core-ref"></p>
+        <p id="report-sub-ref"></p>
+        <p class="avoid-ref" id="report-avoid-ref"></p>
+        <p class="hybrid-ref" id="report-hybrid-ref"></p>
+      </section>
+
+      <footer class="report-footer">
+        <button type="button" class="btn btn-primary" id="btn-share">分享报告</button>
+        <button type="button" class="btn btn-ghost" id="btn-restart">重新测试</button>
+      </footer>
+    </section>
+  </div>
+
+  <!-- 2.0.1 CDN 已 404，使用可用版本；本地副本作兜底 -->
+  <script src="https://static.cloudbase.net/cloudbase-js-sdk/2.28.5/cloudbase.full.js"
+    onerror="this.onerror=null;this.src='./js/cloudbase.full.js'"></script>
+  <script src="./js/radar.js"></script>
+  <script src="./js/api.js"></script>
+  <script src="./js/app.js" defer></script>
+</body>
+</html>

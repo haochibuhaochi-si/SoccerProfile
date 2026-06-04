@@ -1,0 +1,597 @@
+{
+    "meta": {
+      "version": "1.1",
+      "description": "足球风格与竞技水准测试 - 文案资源包 (含亚型 Flavor)"
+    },
+    "intensity_modifiers": {
+      "TIER_A": {
+        "label": "高竞争联赛级",
+        "color": "#E53E3E",
+        "suffix": "精英级",
+        "tone_desc": "你的表现足以在正规联赛中立足，对战术的理解和执行力达到了准职业水准。"
+      },
+      "TIER_B": {
+        "label": "标准业余",
+        "color": "#3182CE",
+        "suffix": "核心级",
+        "tone_desc": "你是标准的业余高手，在野球局中是决定胜负的关键棋子，执行力强。"
+      },
+      "TIER_C": {
+        "label": "休闲野球",
+        "color": "#38A169",
+        "suffix": "快乐级",
+        "tone_desc": "你享受足球带来的乐趣，球风随性，是球场上的社交润滑剂。"
+      },
+      "TIER_D": {
+        "label": "养生局",
+        "color": "#718096",
+        "suffix": "养生级",
+        "tone_desc": "你更看重健康和交流，球场上步伐悠闲，属于智慧型养老踢法。"
+      }
+    },
+    "literacy_modifiers": {
+      "LIT_HIGH": {
+        "label": "战术大师",
+        "tag": "🧠 战术大师",
+        "desc": "你的战术理解远超平均水平，能有效阅读比赛，脑子比脚快。"
+      },
+      "LIT_MID": {
+        "label": "战术通晓",
+        "tag": "📖 战术通晓",
+        "desc": "你具备很强的战术执行力，知道如何在复杂局面下做决策。"
+      },
+      "LIT_LOW": {
+        "label": "执行型球员",
+        "tag": "⚙️ 执行机器",
+        "desc": "你更专注于场上的具体执行，依靠本能和体魄踢球，拒绝过度思考。"
+      }
+    },
+    "archetypes": {
+      "F2_A": {
+        "base": {
+          "title": "防线基石 · 锚点型",
+          "tagline": "门前的最后裁决者，稳如磐石。",
+          "description": "你就是防线上的定海神针。数据表明，你的站位意识和防空能力极佳，极少犯错，是防线最后的保险丝。你或许不是那个大脚开球最远的人，但你是门将最信任的盾牌。",
+          "strengths": ["极佳的站位意识与防空能力", "极少犯错，情绪稳定", "空中对抗优势明显"],
+          "weaknesses": ["出球能力有限，面对高位逼抢容易慌乱", "速度较慢，害怕身后球与速度型前锋"],
+          "training": {
+            "priority_1": "长传精度与造越位战术理解",
+            "priority_2": "回追速度与爆发力训练"
+          },
+          "formation_fit": {
+            "best": "三中卫体系的居中者（Center of 3）",
+            "position": "清道夫或拖后中卫",
+            "avoid": "高压迫体系中的突前后卫"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[博努奇式] The Deep Lying Defender —— 拖后组织、出球稳健、防守预判极佳。",
+            "sub_ref": "次级基因：[胡梅尔斯式] The Sweeper Mind —— 拥有中卫的大局观和阅读比赛能力。",
+            "avoid_ref": "非当前赛道：[拉莫斯式] The Aggressive Chief —— 你的侵略性和进球欲望还未达到这种‘带刀侍卫’的层级。"
+          }
+        },
+        "hybrids": {
+          "F2_BS": {
+            "title_suffix": "出球型",
+            "desc": "你在稳固防守的同时，具备了更强的出球视野。",
+            "ref_flavor": {
+              "add_line": "你的「博努奇式」沉稳中，藏着一脚「迪亚斯式」的精准长传。",
+              "highlight": "后场组织者的影子"
+            }
+          },
+          "F2_AG": {
+            "title_suffix": "清道夫型",
+            "desc": "你更倾向于冒险出击，将战火燃烧在禁区外。",
+            "ref_flavor": {
+              "add_line": "你的「拉莫斯式」血性里，掺杂了「卡纳瓦罗式」的盯人嗅觉。",
+              "highlight": "带刀侍卫的冲动"
+            }
+          }
+        }
+      },
+      "F2_BS": {
+        "base": {
+          "title": "现代卫腰 · 出球扫荡型",
+          "tagline": "从后场发起进攻的节拍器。",
+          "description": "你是现代足球最稀缺的类型。你的双脚是你的武器，不仅防守稳健，更能送上穿透性的长传。你懂得何时该稳，何时该推，是连接防守与进攻的转换器。",
+          "strengths": ["出球冷静，能送上穿透性长传", "具备前插和远射能力", "攻防转换时的第一传极具威胁"],
+          "weaknesses": ["防守专注度有时会因前插而下降", "一对一防守不如纯破坏者强硬"],
+          "training": {
+            "priority_1": "受压下的第一脚出球、中场插上时机",
+            "priority_2": "防守站位与滑铲技巧"
+          },
+          "formation_fit": {
+            "best": "4-3-3 的左/右中卫或三中卫体系的拖后核心",
+            "position": "组织型中卫",
+            "avoid": "纯防守型双中卫（会浪费你的出球才华）"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[范戴克式] The Colossus —— 身体强壮、防守稳健、具备极强的出球能力。",
+            "sub_ref": "次级基因：[迪亚斯式] The Modern Ball-Player —— 脚下技术细腻，敢于持球推进。",
+            "avoid_ref": "非当前赛道：[普约尔式] The Gladiator —— 你的血性和纯粹防守的硬度还未达到这种‘铁血’层级。"
+          }
+        },
+        "hybrids": {
+          "F2_A": {
+            "title_suffix": "稳健型",
+            "desc": "你更偏向于安全出球，极少冒险。",
+            "ref_flavor": {
+              "add_line": "你的「范戴克式」统治力里，带着「博努奇式」的沉稳出球。",
+              "highlight": "后场定海神针"
+            }
+          },
+          "F3_RO": {
+            "title_suffix": "后腰转型型",
+            "desc": "你的防守覆盖面积极大，经常游弋到后腰位置。",
+            "ref_flavor": {
+              "add_line": "你的「范戴克式」防守中，融入了「皮尔洛式」的调度视野。",
+              "highlight": "中场大脑的底色"
+            }
+          }
+        }
+      },
+      "F2_AG": {
+        "base": {
+          "title": "禁区清道夫 · 压迫搅局型",
+          "tagline": "把战火燃烧在对手半场，永不停歇的搅屎棍。",
+          "description": "你就是后防线上的疯狗（褒义）。你喜欢贴身肉搏，喜欢预判传球线路。你的存在让对手前锋感到窒息，但有时也会因为动作过大给球队带来麻烦。",
+          "strengths": ["极高的反击速度和侵略性", "擅长预判传球线路并抢断", "给对手前锋巨大的心理压力"],
+          "weaknesses": ["容易吃牌，防守动作过大", "防线容易脱节，留给身后的空档"],
+          "training": {
+            "priority_1": "滑铲时机、身体对抗技巧",
+            "priority_2": "造越位战术的执行纪律"
+          },
+          "formation_fit": {
+            "best": "4-4-2 或 4-3-3 的边后卫（压上型）",
+            "position": "盯人中卫或进攻型边卫",
+            "avoid": "三中卫体系的居中者"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[拉莫斯式] The Aggressive Chief —— 带刀侍卫、防守凶悍、精神属性极强。",
+            "sub_ref": "次级基因：[卡纳瓦罗式] The Markman —— 盯人能力极强，上抢果断。",
+            "avoid_ref": "非当前赛道：[内斯塔式] The Elegant Defender —— 你的防守优雅度和预判还未达到这种‘优雅’层级。"
+          }
+        },
+        "hybrids": {
+          "F2_BS": {
+            "title_suffix": "全能型",
+            "desc": "你在凶狠上抢的同时，也能送上精准的长传。",
+            "ref_flavor": {
+              "add_line": "你的「拉莫斯式」凶悍里，藏着「范戴克式」的出球能力。",
+              "highlight": "全能卫线的核心"
+            }
+          },
+          "F4_WB": {
+            "title_suffix": "边路突击型",
+            "desc": "你更享受在边路上下往返，而不是纯防守。",
+            "ref_flavor": {
+              "add_line": "你的「拉莫斯式」斗志，转化为了「阿什拉夫式」的往返冲刺。",
+              "highlight": "边路永动机"
+            }
+          }
+        }
+      },
+      "F3_RO": {
+        "base": {
+          "title": "中场大脑 · 深位调度者",
+          "tagline": "掌控节奏的大师，视野决定一切。",
+          "description": "你是球队的肺。你不追求华丽的过人，但你的传球成功率极高。你懂得何时该快，何时该慢，是那个在深处观察全场并决定进攻方向的人。",
+          "strengths": ["极高的传球成功率和比赛阅读能力", "能通过一脚出球改变进攻方向", "体能分配极佳，很少失位"],
+          "weaknesses": ["缺乏爆发性速度，对抗中容易吃亏", "很少参与禁区内的直接终结"],
+          "training": {
+            "priority_1": "45度斜长传、转身护球",
+            "priority_2": "远射能力开发"
+          },
+          "formation_fit": {
+            "best": "4-3-3 的单后腰（Single Pivot）",
+            "position": "拖后组织核心 (Regista)",
+            "avoid": "双后腰中的扫荡者"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[皮尔洛式] The Metronome —— 节奏大师、长传精准、优雅掌控全局。",
+            "sub_ref": "次级基因：[布斯克斯式] The Pivot —— 极度冷静、控球、防守覆盖。",
+            "avoid_ref": "非当前赛道：[莫德里奇式] The Micro-Space Magician —— 你的技术细腻程度和狭小空间摆脱能力还未达到这种‘魔术师’层级。"
+          }
+        },
+        "hybrids": {
+          "F3_B2B": {
+            "title_suffix": "全能型",
+            "desc": "你在调度之余，也会积极参与防守和进攻。",
+            "ref_flavor": {
+              "add_line": "你的「皮尔洛式」优雅里，藏着「贝林厄姆式」的奔跑能力。",
+              "highlight": "全能中场的雏形"
+            }
+          },
+          "F3_AM": {
+            "title_suffix": "前腰转型型",
+            "desc": "你的视野更偏向进攻三区，喜欢送上致命直塞。",
+            "ref_flavor": {
+              "add_line": "你的「皮尔洛式」调度中，多了几分「德布劳内式」的穿透视野。",
+              "highlight": "进攻发起者"
+            }
+          }
+        }
+      },
+      "F3_DE": {
+        "base": {
+          "title": "中场绞肉机 · 破坏锚",
+          "tagline": "拦截、抢断、破坏，对手的噩梦。",
+          "description": "你的存在就是为了打断对手的进攻。你是纯粹的防守者，身体强壮，作风硬朗。你不需要掌声，因为你的工作是在没人注意的地方把球抢回来。",
+          "strengths": ["凶狠的拼抢和极强的防守覆盖", "身体强壮，擅长空中对抗", "能为身前的队友提供坚实屏障"],
+          "weaknesses": ["脚下技术粗糙，容易传球失误", "进攻参与度低，容易成为进攻终结者"],
+          "training": {
+            "priority_1": "卡位防守、头球解围、分球给10号",
+            "priority_2": "体能储备"
+          },
+          "formation_fit": {
+            "best": "4-2-3-1 的双后腰之一（负责防守）",
+            "position": "防守型中场 (Anchor)",
+            "avoid": "单前腰或攻击中场"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[坎特式] The Destroyer —— 覆盖范围巨大、抢断精准、默默无闻的基石。",
+            "sub_ref": "次级基因：[维埃拉式] The Enforcer —— 身体强壮、对抗凶悍、兼具一定的出球能力。",
+            "avoid_ref": "非当前赛道：[德容式] The Deep-Lying Playmaker —— 你的出球技术和组织能力还未达到这种‘指挥官’层级。"
+          }
+        },
+        "hybrids": {
+          "F3_B2B": {
+            "title_suffix": "全能型",
+            "desc": "你在防守之余，也具备一定的插上进攻能力。",
+            "ref_flavor": {
+              "add_line": "你的「坎特式」防守覆盖里，带着「贝林厄姆式」的后插上嗅觉。",
+              "highlight": "攻防转换器"
+            }
+          },
+          "F2_A": {
+            "title_suffix": "后卫转型型",
+            "desc": "你的防守意识极佳，经常退入防线充当第三中卫。",
+            "ref_flavor": {
+              "add_line": "你的「坎特式」抢断，更像「博努奇式」的防线扫荡。",
+              "highlight": "后防清道夫"
+            }
+          }
+        }
+      },
+      "F3_B2B": {
+        "base": {
+          "title": "永动机 · 全能中场",
+          "tagline": "覆盖每一寸草皮，攻防两端的粘合剂。",
+          "description": "你就是那种不知疲倦的发动机。数据不会说谎：你在中场的覆盖面积非常大。相比于纯粹的防守工兵或单纯的10号球员，你的价值在于平衡。你能防守拦截，也能后排插上得分。",
+          "strengths": ["恐怖的跑动距离和覆盖面积", "既能防守拦截，也能后排插上得分", "体能充沛，意志力强"],
+          "weaknesses": ["技术不够细腻，容易在狭小空间丢球", "风格不够鲜明，既不是最好的盾也不是最强的矛"],
+          "training": {
+            "priority_1": "后插上射门、无球跑动接应",
+            "priority_2": "受压下的第一脚出球"
+          },
+          "formation_fit": {
+            "best": "4-4-2 或 4-3-3 的中前卫（8号位）",
+            "position": "全能中场 (Box-to-Box)",
+            "avoid": "单后腰（防守专注度不够）"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[贝林厄姆式] The Box-to-Box Power Carrier —— 覆盖、后插上终结、攻防一体。",
+            "sub_ref": "次级基因：[杰拉德式] The Thunderous Distributor —— 远射威慑 + 长传调度 + 身体驱动。",
+            "avoid_ref": "非当前赛道：[莫德里奇式] The Micro-Space Magician —— 你的技术细腻程度还未达到这种‘魔术师’级别，不要试图在狭小空间秀球。"
+          }
+        },
+        "hybrids": {
+          "F3_AM": {
+            "title_suffix": "创意型",
+            "desc": "你更偏向于进攻端的创造力，后插上时机极佳。",
+            "ref_flavor": {
+              "add_line": "你的「贝林厄姆式」铁血里，流淌着「德布劳内式」手术刀般的灵感。",
+              "highlight": "前腰的创造力"
+            }
+          },
+          "F3_DE": {
+            "title_suffix": "防守型",
+            "desc": "你更偏向于防守端的扫荡，拦截能力更强。",
+            "ref_flavor": {
+              "add_line": "你的「贝林厄姆式」覆盖中，带着一层「坎特式」的绞肉机底色。",
+              "highlight": "防守硬度的加持"
+            }
+          }
+        }
+      },
+      "F3_AM": {
+        "base": {
+          "title": "影子杀手 · 前位创造者",
+          "tagline": "致命一传的艺术家，隐藏在前锋身后的幽灵。",
+          "description": "你是那个在禁区弧顶发牌的人。你的视野和最后一传能力是你的杀手锏。你不喜欢回防，因为你把所有的体能都留给了前场的创造和得分。",
+          "strengths": ["顶级的视野和最后一传能力", "射门技术精湛，擅长禁区弧顶作业", "盘带过人能力强"],
+          "weaknesses": ["防守贡献极低，经常散步", "身体对抗能力差，害怕肌肉丛林"],
+          "training": {
+            "priority_1": "直塞球、肋部配合、远射",
+            "priority_2": "无球跑动接应"
+          },
+          "formation_fit": {
+            "best": "4-2-3-1 的攻击中场（10号位）",
+            "position": "前腰 / 影子前锋",
+            "avoid": "防守型中场或边后卫"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[德布劳内式] The Pass Master —— 顶级视野、暴力远射、传中精准。",
+            "sub_ref": "次级基因：[齐达内式] The Maestro —— 控球大师、大局观极佳、技术细腻。",
+            "avoid_ref": "非当前赛道：[梅西式] The GOAT —— 你的盘带过人和得分能力还未达到这种‘现象级’层级。"
+          }
+        },
+        "hybrids": {
+          "F3_B2B": {
+            "title_suffix": "全能型",
+            "desc": "你在创造机会的同时，也愿意参与一部分防守。",
+            "ref_flavor": {
+              "add_line": "你的「德布劳内式」才华里，藏着「贝林厄姆式」的战斗精神。",
+              "highlight": "B2B Creator"
+            }
+          },
+          "F5_RF": {
+            "title_suffix": "终结型",
+            "desc": "你更偏向于直接得分，而不仅仅是助攻。",
+            "ref_flavor": {
+              "add_line": "你的「德布劳内式」传球视野，转化为「穆勒式」的鬼魅终结。",
+              "highlight": "影子杀手"
+            }
+          }
+        }
+      },
+      "F4_CR": {
+        "base": {
+          "title": "爆破手 · 传中喂饼型",
+          "tagline": "把防守队员生吃后送上精准传中。",
+          "description": "你的武器就是速度。你像一把尖刀一样插向底线，然后用精准的传中找到队友。你不喜欢内切，因为你知道下底传中是对方后卫最头疼的战术。",
+          "strengths": ["绝对速度优势，下底传中精准", "体能好，能坚决执行战术要求", "擅长制造角球和边线球"],
+          "weaknesses": ["内切能力弱，射门欲望低", "容易被对手预判传球路线"],
+          "training": {
+            "priority_1": "下底倒三角、速度耐力",
+            "priority_2": "逆足传中"
+          },
+          "formation_fit": {
+            "best": "4-4-2 或 4-3-3 的传统边锋",
+            "position": "边路突击手 (Winger)",
+            "avoid": "内切型边锋或伪9号"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[贝克汉姆式] The Crossing Specialist —— 传中精准、跑动积极、战术执行力强。",
+            "sub_ref": "次级基因：[罗本式] The Speed Demon —— 速度惊人、内切射门能力强。",
+            "avoid_ref": "非当前赛道：[C罗式] The Goal Machine —— 你的得分能力和身体素质还未达到这种‘进球机器’层级。"
+          }
+        },
+        "hybrids": {
+          "F4_IN": {
+            "title_suffix": "内切型",
+            "desc": "你在下底的同时，也具备内切射门的威胁。",
+            "ref_flavor": {
+              "add_line": "你的「贝克汉姆式」传中脚法，融合了「罗本式」的内切威胁。",
+              "highlight": "全能边锋"
+            }
+          },
+          "F4_WB": {
+            "title_suffix": "往返型",
+            "desc": "你更愿意回防协助后卫，而不是一味进攻。",
+            "ref_flavor": {
+              "add_line": "你的「贝克汉姆式」跑动中，带着「特里皮尔式」的防守责任感。",
+              "highlight": "边路工兵"
+            }
+          }
+        }
+      },
+      "F4_IN": {
+        "base": {
+          "title": "肋部杀手 · 内切终结型",
+          "tagline": "内切、射门、得分，左脚将的华尔兹。",
+          "description": "你不喜欢走外线。你拿球后的第一反应就是内切，然后用你惯用的脚（通常是右脚）轰门。你是得分手，不是传中手。",
+          "strengths": ["极强的内切射门能力和得分嗅觉", "擅长与中锋做撞墙配合", "在肋部区域极具威胁"],
+          "weaknesses": ["不防守，不喜欢回防", "传中能力差，容易陷入单打独斗"],
+          "training": {
+            "priority_1": "内切兜射远角、与中锋二过一",
+            "priority_2": "逆足能力开发"
+          },
+          "formation_fit": {
+            "best": "4-3-3 的内切边锋（Inverted Winger）",
+            "position": "内切型边锋 / 第二前锋",
+            "avoid": "传统边锋或边后卫"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[萨拉赫式] The Egyptian King —— 内切射门、得分能力强、跑位鬼魅。",
+            "sub_ref": "次级基因：[内马尔式] The Dribbler —— 盘带过人极强、创造力十足。",
+            "avoid_ref": "非当前赛道：[梅西式] The GOAT —— 你的盘带过人和得分能力还未达到这种‘现象级’层级。"
+          }
+        },
+        "hybrids": {
+          "F4_CR": {
+            "title_suffix": "传中型",
+            "desc": "你在内切的同时，也会适时下底传中。",
+            "ref_flavor": {
+              "add_line": "你的「萨拉赫式」内切中，藏着「贝克汉姆式」的传中嗅觉。",
+              "highlight": "传射兼备"
+            }
+          },
+          "F5_PO": {
+            "title_suffix": "抢点型",
+            "desc": "你内切后的第一选择是寻找队友，而不是自己射门。",
+            "ref_flavor": {
+              "add_line": "你的「萨拉赫式」跑位，变成了「因扎吉式」的门前嗅觉。",
+              "highlight": "机会主义者"
+            }
+          }
+        }
+      },
+      "F4_WB": {
+        "base": {
+          "title": "边路走廊 · 往返通道型",
+          "tagline": "攻防两端的边路永动机，不知疲倦。",
+          "description": "你就是边路的巴士司机。你不仅要进攻，更要防守。你的体能是你的资本，你能在120分钟内不断上下往返，是阵型宽度的重要保障。",
+          "strengths": ["极强的往返跑能力和上下助攻意识", "防守稳健，能及时回防补位", "体能充沛，是阵型宽度的重要保障"],
+          "weaknesses": ["传中质量一般，创造力不足", "容易在攻防转换瞬间失位"],
+          "training": {
+            "priority_1": "往返冲刺、防守卡位、低平传中",
+            "priority_2": "体能储备"
+          },
+          "formation_fit": {
+            "best": "3-5-2 或 5-3-2 的翼卫（Wing-Back）",
+            "position": "进攻型边后卫 / 翼卫",
+            "avoid": "纯防守型边后卫"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[特里皮尔式] The Crossing Wing-Back —— 传中精准、往返能力强、防守稳健。",
+            "sub_ref": "次级基因：[阿什拉夫式] The Athletic Wing-Back —— 速度惊人、体能充沛、攻防兼备。",
+            "avoid_ref": "非当前赛道：[卡洛斯式] The Cannon —— 你的身体素质和插上助攻能力还未达到这种‘重炮手’层级。"
+          }
+        },
+        "hybrids": {
+          "F4_CR": {
+            "title_suffix": "进攻型",
+            "desc": "你更偏向于助攻，传中质量更高。",
+            "ref_flavor": {
+              "add_line": "你的「特里皮尔式」稳健里，藏着「贝克汉姆式」的传中弧度。",
+              "highlight": "助攻机器"
+            }
+          },
+          "F2_AG": {
+            "title_suffix": "防守型",
+            "desc": "你更偏向于防守，是边路的防守屏障。",
+            "ref_flavor": {
+              "add_line": "你的「特里皮尔式」防守中，带着「拉莫斯式」的侵略性。",
+              "highlight": "边路铁闸"
+            }
+          }
+        }
+      },
+      "F5_PO": {
+        "base": {
+          "title": "机会主义者 · 禁区猎手",
+          "tagline": "只要给一丝缝隙，我就能送你回家。",
+          "description": "你只关心一件事：进球。你不参与防守，也不回撤接应。你就像一条鲨鱼一样潜伏在禁区里，等待着后卫的一次失误，然后给予致命一击。",
+          "strengths": ["顶级的跑位意识和反越位嗅觉", "射门冷静，把握机会能力极强", "不浪费体能在无谓的回防上"],
+          "weaknesses": ["不参与防守，不回撤接应", "背身拿球能力差，害怕身体对抗"],
+          "training": {
+            "priority_1": "抢点射门、反越位时机、门前嗅觉",
+            "priority_2": "无球跑动"
+          },
+          "formation_fit": {
+            "best": "4-3-3 的中锋（9号位）",
+            "position": "抢点型前锋 / 禁区猎手",
+            "avoid": "伪9号或回撤型前锋"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[因扎吉式] The Ghost Striker —— 抢点大师、跑位鬼魅、射术精湛。",
+            "sub_ref": "次级基因：[凯恩式] The Complete Striker —— 技术全面、射术精湛、具备一定的做球能力。",
+            "avoid_ref": "非当前赛道：[C罗式] The Goal Machine —— 你的身体素质和弹跳能力还未达到这种‘进球机器’层级。"
+          }
+        },
+        "hybrids": {
+          "F5_TG": {
+            "title_suffix": "支点型",
+            "desc": "你在抢点的同时，也能背身护球做球。",
+            "ref_flavor": {
+              "add_line": "你的「因扎吉式」嗅觉，结合了「德罗巴式」的空中支点作用。",
+              "highlight": "全能中锋"
+            }
+          },
+          "F5_RF": {
+            "title_suffix": "流动型",
+            "desc": "你的跑位更飘忽不定，不仅仅局限于禁区。",
+            "ref_flavor": {
+              "add_line": "你的「因扎吉式」嗅觉，进化成了「穆勒式」的 Raumdeuter（空间阅读者）。",
+              "highlight": "幽灵般的游弋"
+            }
+          }
+        }
+      },
+      "F5_TG": {
+        "base": {
+          "title": "战术轴心 · 支点墙/伪九流动",
+          "tagline": "背身拿球、做球、串联，锋线上的润滑剂。",
+          "description": "你不是那个一脚定乾坤的人，你是那个把球拿住的人。你能抗住强壮的后卫，把球分给插上的队友。你是战术的核心，是锋线上的支点。",
+          "strengths": ["极强的背身护球和做球能力", "能够拉边扯动，为队友创造空间", "支点作用明显，能抗住强壮后卫"],
+          "weaknesses": ["绝对速度不快，射门转化率不稳定", "容易陷入与后卫的缠斗而丢失球权"],
+          "training": {
+            "priority_1": "背身做墙、头球摆渡、拉边策应",
+            "priority_2": "射门精度"
+          },
+          "formation_fit": {
+            "best": "4-3-3 的伪9号（False 9）",
+            "position": "支点中锋 / 伪9号",
+            "avoid": "纯抢点型前锋"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[德罗巴式] The Strong Target Man —— 身体强壮、支点作用明显、头球出色。",
+            "sub_ref": "次级基因：[阿圭罗式] The Agile Finisher —— 灵活、射术精湛、具备一定的做球能力。",
+            "avoid_ref": "非当前赛道：[莱万多夫斯基式] The Perfect Striker —— 你的全面性和稳定性还未达到这种‘全能中锋’层级。"
+          }
+        },
+        "hybrids": {
+          "F5_PO": {
+            "title_suffix": "抢点型",
+            "desc": "你在做球的同时，也具备极强的抢点射门能力。",
+            "ref_flavor": {
+              "add_line": "你的「德罗巴式」支点里，藏着「因扎吉式」的抢点本能。",
+              "highlight": "禁区统治者"
+            }
+          },
+          "F3_AM": {
+            "title_suffix": "回撤型",
+            "desc": "你更喜欢回撤到中场拿球组织，而不是背身护球。",
+            "ref_flavor": {
+              "add_line": "你的「德罗巴式」体格，用来做「德布劳内式」的串联工作。",
+              "highlight": "前场组织者"
+            }
+          }
+        }
+      },
+      "F5_RF": {
+        "base": {
+          "title": "自由人 · 流动终结",
+          "tagline": "无处不在的影子，哪里有空档就出现在哪里。",
+          "description": "你不属于任何一个固定的位置。你是幽灵，是影子。你能在中路、边路、甚至后腰位置出现。你的技术全面，但最擅长的是在禁区前沿游走并完成终结。",
+          "strengths": ["极高的足球智商和无球跑动能力", "能胜任多个位置，技术全面", "擅长在禁区前沿游走并远射"],
+          "weaknesses": ["风格模糊，既不是纯9号也不是纯10号", "身体对抗和防空能力较弱"],
+          "training": {
+            "priority_1": "禁区前沿远射、无球穿插、肋部配合",
+            "priority_2": "身体对抗"
+          },
+          "formation_fit": {
+            "best": "4-2-3-1 的影子前锋（Second Striker）",
+            "position": "自由人 / 第二前锋",
+            "avoid": "纯中锋或纯边锋"
+          },
+          "style_reference": {
+            "disclaimer": "球员姓名仅用于足球风格类比说明，不构成任何 endorsement/代言/身份认证。",
+            "core_ref": "核心原型基因：[穆勒式] The Raumdeuter —— 空间阅读者、跑位鬼魅、进球机器。",
+            "sub_ref": "次级基因：[迪马利亚式] The Winger Forward —— 速度惊人、技术细腻、具备极强的得分能力。",
+            "avoid_ref": "非当前赛道：[梅西式] The GOAT —— 你的盘带过人和得分能力还未达到这种‘现象级’层级。"
+          }
+        },
+        "hybrids": {
+          "F5_PO": {
+            "title_suffix": "抢点型",
+            "desc": "你的跑位更具侵略性，直接威胁球门。",
+            "ref_flavor": {
+              "add_line": "你的「穆勒式」跑位，变成了「因扎吉式」的致命一击。",
+              "highlight": "机会猎手"
+            }
+          },
+          "F4_IN": {
+            "title_suffix": "内切型",
+            "desc": "你更喜欢在边路内切射门，而不是传球。",
+            "ref_flavor": {
+              "add_line": "你的「穆勒式」智慧，结合了「萨拉赫式」的内切终结。",
+              "highlight": "边路自由人"
+            }
+          }
+        }
+      }
+    }
+  }
