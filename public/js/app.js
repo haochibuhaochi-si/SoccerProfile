@@ -227,7 +227,7 @@ async function submitQuiz() {
 
 function showPaywallPreview(data) {
   $('preview-title').textContent = data.archetype_title || '已匹配原型';
-  $('preview-score').textContent = `PlayLevel · ${data.playlevel_score ?? '—'}`;
+  $('preview-score').textContent = `PlayLevel · ${Number(data.playlevel_score ?? 0).toFixed(2)}`;
 }
 
 function animatePlayLevel(target, el) {
@@ -238,10 +238,68 @@ function animatePlayLevel(target, el) {
     const p = Math.min((now - t0) / duration, 1);
     const eased = 1 - Math.pow(1 - p, 3);
     const val = start + (target - start) * eased;
-    el.textContent = val.toFixed(1);
+    el.textContent = val.toFixed(2);
     if (p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+}
+
+function renderTextList(container, items, formatter) {
+  container.innerHTML = '';
+  (items || []).filter(Boolean).forEach((item) => {
+    const node = document.createElement('div');
+    node.className = 'insight-card';
+    node.innerHTML = formatter(item);
+    container.appendChild(node);
+  });
+}
+
+function signedImpact(value) {
+  const n = Number(value || 0);
+  if (n > 0) return `+${n.toFixed(2)}`;
+  return n.toFixed(2);
+}
+
+function renderDeepReport(deep) {
+  $('report-deep-summary').textContent = deep?.axis_insights?.summary || '';
+
+  renderTextList($('report-signatures'), deep?.axis_insights?.signatures, (item) => `
+    <div class="insight-score">${item.value.toFixed(1)}</div>
+    <div>
+      <strong>${item.label}</strong>
+      <p>${item.tone}</p>
+    </div>
+  `);
+
+  const script = deep?.match_script || {};
+  const scriptItems = [
+    ['持球', script.with_ball],
+    ['无球', script.without_ball],
+    ['转换', script.transition],
+    ['抗压', script.pressure],
+    ['战术任务', script.game_context],
+  ].filter(([, text]) => text);
+  const scriptEl = $('report-match-script');
+  scriptEl.innerHTML = '';
+  scriptItems.forEach(([label, text]) => {
+    const row = document.createElement('div');
+    row.className = 'script-row';
+    row.innerHTML = `<span>${label}</span><p>${text}</p>`;
+    scriptEl.appendChild(row);
+  });
+
+  const breakdownEl = $('report-playlevel-breakdown');
+  breakdownEl.innerHTML = '';
+  (deep?.playlevel_breakdown || []).forEach((item) => {
+    const row = document.createElement('div');
+    row.className = 'breakdown-row';
+    const impact = Number(item.impact || 0);
+    row.innerHTML = `
+      <span>${item.label}</span>
+      <strong class="${impact >= 0 ? 'positive' : 'negative'}">${signedImpact(impact)}</strong>
+    `;
+    breakdownEl.appendChild(row);
+  });
 }
 
 function renderReport(data) {
@@ -256,6 +314,8 @@ function renderReport(data) {
   drawRadarChart($('radar-canvas'), data.radar_data);
 
   $('report-description').textContent = copy.description || '';
+  renderDeepReport(data.deep_report);
+
   const strEl = $('report-strengths');
   strEl.innerHTML = '';
   (copy.strengths || []).forEach((s) => {
@@ -263,11 +323,21 @@ function renderReport(data) {
     li.textContent = s;
     strEl.appendChild(li);
   });
+  (data.deep_report?.axis_insights?.dominant_traits || []).forEach((item) => {
+    const li = document.createElement('li');
+    li.textContent = `${item.label} ${item.value.toFixed(1)}：${item.tone}`;
+    strEl.appendChild(li);
+  });
   const weakEl = $('report-weaknesses');
   weakEl.innerHTML = '';
   (copy.weaknesses || []).forEach((s) => {
     const li = document.createElement('li');
     li.textContent = s;
+    weakEl.appendChild(li);
+  });
+  (data.deep_report?.axis_insights?.growth_edges || []).forEach((item) => {
+    const li = document.createElement('li');
+    li.textContent = `${item.label} ${item.value.toFixed(1)}：${item.advice}`;
     weakEl.appendChild(li);
   });
 

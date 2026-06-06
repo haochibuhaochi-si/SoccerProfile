@@ -89,13 +89,18 @@
       </header>
 
       <section class="report-block">
-        <h3>风格雷达</h3>
-        <canvas id="radar-canvas" width="320" height="280"></canvas>
+        <h3>风格星图</h3>
+        <div class="radar-shell">
+          <canvas id="radar-canvas" width="360" height="360"></canvas>
+          <div class="radar-caption">12 维风格向量 · 高亮为你的常踢位置族</div>
+        </div>
       </section>
 
       <section class="report-block">
         <h3>核心解析</h3>
         <p id="report-description"></p>
+        <p class="deep-summary" id="report-deep-summary"></p>
+        <div class="insight-grid" id="report-signatures"></div>
         <div class="two-col">
           <div>
             <h4>优势</h4>
@@ -106,11 +111,16 @@
             <ul id="report-weaknesses"></ul>
           </div>
         </div>
+        <div class="analysis-panel">
+          <h4>比赛说明书</h4>
+          <div id="report-match-script" class="match-script"></div>
+        </div>
       </section>
 
       <section class="report-block">
         <h3>竞技强度分析</h3>
         <p id="report-intensity-tone"></p>
+        <div class="breakdown-list" id="report-playlevel-breakdown"></div>
       </section>
 
       <section class="report-block">
@@ -122,9 +132,20 @@
       <section class="report-block style-ref-block">
         <h3>风格参照系</h3>
         <p class="disclaimer" id="report-disclaimer"></p>
-        <p id="report-core-ref"></p>
-        <p id="report-sub-ref"></p>
-        <p class="avoid-ref" id="report-avoid-ref"></p>
+        <div class="reference-grid">
+          <article class="reference-card core">
+            <span>核心原型</span>
+            <p id="report-core-ref"></p>
+          </article>
+          <article class="reference-card sub">
+            <span>次级基因</span>
+            <p id="report-sub-ref"></p>
+          </article>
+          <article class="reference-card avoid">
+            <span>非当前赛道</span>
+            <p id="report-avoid-ref"></p>
+          </article>
+        </div>
         <p class="hybrid-ref" id="report-hybrid-ref"></p>
       </section>
 

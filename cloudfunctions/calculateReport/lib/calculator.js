@@ -17,13 +17,115 @@ const AXES = [
   'F5-HoldUp', 'F5-Movement', 'F5-Physical',
 ];
 
+const AXIS_META = {
+  'F2-Engagement': {
+    label: '防线侵略性',
+    short: '侵略',
+    high: '更愿意主动压迫、前顶和破坏第一传',
+    low: '更倾向稳守位置、保护禁区和延缓推进',
+    advice: '注意前顶后的身后保护，和中后场队友约定补位触发点。',
+  },
+  'F2-Distribution': {
+    label: '后场出球',
+    short: '出球',
+    high: '敢于用穿透传球或转移球打破第一道压迫',
+    low: '优先选择安全路线，失误率低但推进效率有限',
+    advice: '增加受压下的第一脚斜传和弱侧转移训练。',
+  },
+  'F2-Body': {
+    label: '身体工具',
+    short: '身体',
+    high: '更依赖身体对抗、卡位和空中优势解决问题',
+    low: '更依赖站位、预判和脚下处理规避硬碰硬',
+    advice: '补足核心力量与起跳对抗，避免关键区域被直接压制。',
+  },
+  'F3-Tempo': {
+    label: '节奏驱动',
+    short: '节奏',
+    high: '喜欢向前提速，用推进和直塞改变比赛节奏',
+    low: '擅长控节奏和保球，愿意先让球队站稳结构',
+    advice: '练习快慢切换，别让每次触球都变成同一种节奏。',
+  },
+  'F3-Duels': {
+    label: '中场对抗',
+    short: '对抗',
+    high: '愿意迎上去抢、拼、压迫，能制造转换机会',
+    low: '更重视规避风险和保持阵型，不轻易陷入缠斗',
+    advice: '提升一对一防守脚步和肩部对抗，减少被迫回避的场景。',
+  },
+  'F3-Territory': {
+    label: '前插热区',
+    short: '前插',
+    high: '活动范围更靠前，愿意攻击肋部和禁区前沿',
+    low: '更喜欢回撤接应，在较深位置组织和保护球权',
+    advice: '明确何时前插、何时留守，避免中场身后被打空。',
+  },
+  'F4-Mode': {
+    label: '边路杀伤',
+    short: '杀伤',
+    high: '更偏内切、射门和威胁传球',
+    low: '更偏下底、传中和边路重组',
+    advice: '补一个反向武器：内切型练外线传中，传中型练肋部内收。',
+  },
+  'F4-WorkRate': {
+    label: '往返覆盖',
+    short: '往返',
+    high: '愿意高速回防和持续覆盖边路纵深',
+    low: '更偏进攻端投入，防守回收相对保守',
+    advice: '把回防路线练成习惯，尤其是丢球后的前 5 秒。',
+  },
+  'F4-Width': {
+    label: '空间取向',
+    short: '空间',
+    high: '喜欢内收肋部，参与中路连接和二点球争夺',
+    low: '喜欢拉开宽度，贴边提供传中和纵深',
+    advice: '根据队友站位动态选择内收或拉边，别固定在一条线。',
+  },
+  'F5-HoldUp': {
+    label: '支点能力',
+    short: '支点',
+    high: '能背身护球、做墙和等待队友插上',
+    low: '更喜欢一脚处理、转身和流动接应',
+    advice: '提高背身第一下触球质量，让队友有时间靠近你。',
+  },
+  'F5-Movement': {
+    label: '跑位嗅觉',
+    short: '跑位',
+    high: '更像禁区猎手，擅长压越位线和攻击第二落点',
+    low: '更流动，愿意回撤、拉边和参与组织',
+    advice: '多练启动前的假动作和盲侧跑，提升无球杀伤。',
+  },
+  'F5-Physical': {
+    label: '终结武器',
+    short: '终结',
+    high: '更依赖力量、技巧和个人处理完成终结',
+    low: '更依赖预判、第一时间处理和门前嗅觉',
+    advice: '把常用射门方式练成稳定模板，再扩展第二终结手段。',
+  },
+};
+
 const ENV_BASE = { A: 8.0, 'B+': 6.5, B: 5.0, C: 3.5, D: 2.0 };
 const EXEC_MOD = { '+0.2': 0.3, '0': 0, '-0.2': -0.3, '-0.4': -0.5 };
 const FREQ_MOD = { 'Freq High': 0.5, 'Freq Med': 0.2, 'Freq Low': 0, 'Freq Rare': -0.3 };
 const PEER_MOD = { 'Peer Level High': 0.4, 'Peer Level Med': 0.1, 'Peer Level Low': -0.2 };
 const RELIABILITY_MOD = { 'Reliability High': 0.3, 'Reliability Med': 0.1, 'Reliability Low': -0.2 };
 const PITCH_MOD = { 'Env Bonus': 0.1, 'Env Neutral': 0, 'Env Penalty': -0.1 };
-const LITERACY_BONUS = { 4: 0.6, 3: 0.4, 2: 0.2 };
+const AGE_MOD = {
+  'Age Youth': 0.08,
+  'Age Peak': 0.18,
+  'Age Prime': 0.12,
+  'Age Mature': -0.04,
+  'Age Veteran': -0.18,
+};
+const SELF_MOD = {
+  'Self Tier A': 0.22,
+  'Self Tier B': 0.12,
+  'Self Tier C': 0.04,
+  'Self Tier D': -0.08,
+  'Self Tier E': -0.18,
+};
+const LITERACY_BONUS = { 4: 0.6, 3: 0.4, 2: 0.2, 1: 0.1 };
+const STYLE_EXEC_AXES = ['F3-Duels', 'F4-WorkRate', 'F2-Engagement', 'F2-Body', 'F5-Physical'];
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
@@ -147,7 +249,13 @@ function matchArchetypes(userVec, q0Keys, prototypes) {
   };
 }
 
-function computePlayLevel(intensityQuestions, intensityAnswers, literacyCorrect) {
+function styleExecutionBonus(vector) {
+  const avg =
+    STYLE_EXEC_AXES.reduce((sum, axis) => sum + (vector[axis] ?? 5), 0) / STYLE_EXEC_AXES.length;
+  return ((avg - 5) / 5) * 0.35;
+}
+
+function computePlayLevel(intensityQuestions, intensityAnswers, literacyCorrect, styleVector) {
   let base = 5.0;
   const getOpt = (idx) => {
     const q = intensityQuestions[idx];
@@ -164,29 +272,26 @@ function computePlayLevel(intensityQuestions, intensityAnswers, literacyCorrect)
   const peerMod = getMetaModifier(getOpt(2), PEER_MOD);
   const reliabilityMod = getMetaModifier(getOpt(4), RELIABILITY_MOD);
   const pitchMod = getMetaModifier(getOpt(7), PITCH_MOD);
+  const ageMod = getMetaModifier(getOpt(8), AGE_MOD);
+  const selfMod = getMetaModifier(getOpt(9), SELF_MOD);
 
   const execIndices = [3, 5, 6];
   let execSum = 0;
-  let execCount = 0;
   execIndices.forEach((idx) => {
     const opt = getOpt(idx);
     const tag = (opt?.tags || []).find((t) => t.type === 'exec');
-    if (tag) {
-      execSum += EXEC_MOD[tag.value] ?? 0;
-      execCount += 1;
-    }
+    if (tag) execSum += EXEC_MOD[tag.value] ?? 0;
   });
-  const execMod = execCount ? execSum / execCount : 0;
+  const execMod = execSum / 2;
 
   const litBonus = LITERACY_BONUS[literacyCorrect] ?? 0;
-  const score = clamp(
-    base + freqMod + peerMod + execMod + reliabilityMod + litBonus + pitchMod,
-    1,
-    10,
-  );
+  const styleMod = styleExecutionBonus(styleVector || {});
+  const rawScore =
+    base + freqMod + peerMod + execMod + reliabilityMod + litBonus + pitchMod + ageMod + selfMod + styleMod;
+  const score = clamp(rawScore, 1, 10);
 
   return {
-    playlevel_score: Math.round(score * 10) / 10,
+    playlevel_score: Math.round(score * 100) / 100,
     base,
     freqMod,
     peerMod,
@@ -194,19 +299,25 @@ function computePlayLevel(intensityQuestions, intensityAnswers, literacyCorrect)
     reliabilityMod,
     litBonus,
     pitchMod,
+    ageMod,
+    selfMod,
+    styleMod,
+    raw_score: Math.round(rawScore * 1000) / 1000,
   };
 }
 
 function mapIntensityBand(score) {
-  if (score >= 8.5) return 'TIER_A';
+  if (score >= 9.3) return 'TIER_S';
+  if (score >= 8.2) return 'TIER_A';
   if (score >= 6.5) return 'TIER_B';
-  if (score >= 4.0) return 'TIER_C';
+  if (score >= 4.2) return 'TIER_C';
   return 'TIER_D';
 }
 
 function mapLiteracyBand(correctCount) {
-  if (correctCount >= 4) return 'LIT_HIGH';
-  if (correctCount >= 3) return 'LIT_MID';
+  if (correctCount >= 4) return 'LIT_ELITE';
+  if (correctCount >= 3) return 'LIT_HIGH';
+  if (correctCount >= 2) return 'LIT_MID';
   return 'LIT_LOW';
 }
 
@@ -219,20 +330,109 @@ function countLiteracyCorrect(literacyQuestions, literacyAnswers) {
 }
 
 function buildRadarData(vector, q0Keys, prototypes) {
-  const families = {
-    defender: ['F2-Engagement', 'F2-Distribution', 'F2-Body'],
-    midfielder: ['F3-Tempo', 'F3-Duels', 'F3-Territory'],
-    wing: ['F4-Mode', 'F4-WorkRate', 'F4-Width'],
-    striker: ['F5-HoldUp', 'F5-Movement', 'F5-Physical'],
-  };
+  const selected = new Set(q0Keys || []);
   const primary = q0Keys?.[0] || 'midfielder';
-  const keys = families[primary] || families.midfielder;
-  const labels = prototypes.radar_labels[primary] || prototypes.radar_labels.midfielder;
-  return keys.map((k, i) => ({
+  const familyByAxis = {
+    'F2': 'defender',
+    'F3': 'midfielder',
+    'F4': 'wing',
+    'F5': 'striker',
+  };
+
+  return AXES.map((k) => {
+    const family = familyByAxis[k.slice(0, 2)];
+    const meta = AXIS_META[k];
+    return {
     axis: k,
-    label: labels[i],
+      label: meta?.short || k,
+      full_label: meta?.label || k,
     value: Math.round((vector[k] ?? 5) * 10) / 10,
+      active: selected.size ? selected.has(family) : family === primary,
+    };
+  });
+}
+
+function axisTone(axis, value) {
+  const meta = AXIS_META[axis] || {};
+  if (value >= 6.8) return meta.high || '该维度倾向明显偏高';
+  if (value <= 3.2) return meta.low || '该维度倾向明显偏低';
+  return '处在均衡区间，说明你会根据比赛局面切换处理方式';
+}
+
+function buildAxisInsights(vector) {
+  const items = AXES.map((axis) => ({
+    axis,
+    label: AXIS_META[axis]?.label || axis,
+    value: Math.round((vector[axis] ?? 5) * 10) / 10,
+    tone: axisTone(axis, vector[axis] ?? 5),
+    advice: AXIS_META[axis]?.advice || '',
   }));
+
+  const byDistance = [...items].sort((a, b) => Math.abs(b.value - 5) - Math.abs(a.value - 5));
+  const top = [...items].sort((a, b) => b.value - a.value).slice(0, 3);
+  const bottom = [...items].sort((a, b) => a.value - b.value).slice(0, 2);
+  const signatures = byDistance.slice(0, 4);
+
+  return {
+    summary: `你的画像不是单一位置标签，而是由 ${signatures.map((i) => i.label).join('、')} 共同构成的比赛习惯。分数越偏离 5，说明这个维度越像你的稳定本能。`,
+    signatures,
+    dominant_traits: top,
+    growth_edges: bottom,
+  };
+}
+
+function pickAxis(vector, axes) {
+  return axes
+    .map((axis) => ({ axis, value: vector[axis] ?? 5 }))
+    .sort((a, b) => b.value - a.value)[0];
+}
+
+function buildMatchScript(vector, match, play, literacyBand) {
+  const onBall = pickAxis(vector, ['F2-Distribution', 'F3-Tempo', 'F4-Mode', 'F5-HoldUp']);
+  const offBall = pickAxis(vector, ['F2-Engagement', 'F3-Duels', 'F4-WorkRate', 'F5-Movement']);
+  const space = pickAxis(vector, ['F3-Territory', 'F4-Width', 'F5-Movement']);
+  const pressureText =
+    play.execMod >= 0.2
+      ? '抗压处理是加分项，遇到逼抢时不容易马上丢掉球权。'
+      : play.execMod <= -0.2
+        ? '高压下的第一脚处理是风险点，强队局里会被重点照顾。'
+        : '抗压稳定性中等，面对连续逼抢时表现会受场地和队友接应影响。';
+
+  return {
+    with_ball: `持球时，你最容易通过「${AXIS_META[onBall.axis].label}」改变局面：${axisTone(onBall.axis, onBall.value)}。`,
+    without_ball: `无球和防守阶段，你的关键开关是「${AXIS_META[offBall.axis].label}」：${axisTone(offBall.axis, offBall.value)}。`,
+    transition: `攻守转换里，「${AXIS_META[space.axis].label}」决定你更像推进器、连接点还是终结点。${axisTone(space.axis, space.value)}。`,
+    pressure: pressureText,
+    game_context:
+      literacyBand === 'LIT_HIGH'
+        ? '你适合被赋予更复杂的战术任务，例如压迫触发点、弱侧转移或肋部轮转。'
+        : literacyBand === 'LIT_MID'
+          ? '你能理解多数战术安排，但最好把任务拆成清晰的两三个触发条件。'
+          : '你更适合明确、直接的场上指令，先把站位和第一选择稳定下来。',
+  };
+}
+
+function buildPlayBreakdown(play) {
+  return [
+    { label: '比赛环境', value: play.base, impact: play.base - 5 },
+    { label: '踢球频率', value: play.freqMod, impact: play.freqMod },
+    { label: '队友/对手水平', value: play.peerMod, impact: play.peerMod },
+    { label: '执行稳定性', value: play.execMod, impact: play.execMod },
+    { label: '位置可靠性', value: play.reliabilityMod, impact: play.reliabilityMod },
+    { label: '战术素养', value: play.litBonus, impact: play.litBonus },
+    { label: '场地条件', value: play.pitchMod, impact: play.pitchMod },
+    { label: '年龄体能', value: play.ageMod, impact: play.ageMod },
+    { label: '自评校准', value: play.selfMod, impact: play.selfMod },
+    { label: '风格执行画像', value: play.styleMod, impact: play.styleMod },
+  ];
+}
+
+function buildDeepReport(vector, match, play, literacyBand) {
+  return {
+    axis_insights: buildAxisInsights(vector),
+    match_script: buildMatchScript(vector, match, play, literacyBand),
+    playlevel_breakdown: buildPlayBreakdown(play),
+  };
 }
 
 function assembleCopy(copyPack, archetypeId, secondaryId, isHybrid, intensityBand, literacyBand) {
@@ -294,7 +494,7 @@ function calculateReport(payload) {
   const styleVec = computeStyleVector(questions.style, style);
   const match = matchArchetypes(styleVec, q0, prototypes);
   const litCorrect = countLiteracyCorrect(questions.literacy, literacy);
-  const play = computePlayLevel(questions.intensity, intensity, litCorrect);
+  const play = computePlayLevel(questions.intensity, intensity, litCorrect, styleVec);
   const intensityBand = mapIntensityBand(play.playlevel_score);
   const literacyBand = mapLiteracyBand(litCorrect);
   const copyData = assembleCopy(
@@ -307,6 +507,7 @@ function calculateReport(payload) {
   );
 
   const archBase = copyPack.archetypes[match.archetype_id]?.base;
+  const deepReport = buildDeepReport(styleVec, match, play, literacyBand);
 
   return {
     archetype_id: match.archetype_id,
@@ -321,6 +522,7 @@ function calculateReport(payload) {
     literacy_correct: litCorrect,
     radar_data: buildRadarData(styleVec, q0, prototypes),
     style_vector: styleVec,
+    deep_report: deepReport,
     copy_data: copyData,
   };
 }

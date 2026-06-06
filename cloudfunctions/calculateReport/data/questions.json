@@ -174,7 +174,7 @@
             {
               "type": "axis",
               "axis": "F4-Width",
-              "delta": -1
+              "delta": 1
             }
           ]
         }
@@ -508,6 +508,17 @@
               "delta": 1
             }
           ]
+        },
+        {
+          "key": "C",
+          "label": "不多调整，趁门将未站稳第一时间低射（嗅觉）",
+          "tags": [
+            {
+              "type": "axis",
+              "axis": "F5-Physical",
+              "delta": -1
+            }
+          ]
         }
       ],
       "type": "radio"
@@ -709,6 +720,17 @@
               "type": "axis",
               "axis": "F5-Physical",
               "delta": 1
+            }
+          ]
+        },
+        {
+          "key": "C",
+          "label": "观察门将重心后低平球打反方向（嗅觉/预判）",
+          "tags": [
+            {
+              "type": "axis",
+              "axis": "F5-Physical",
+              "delta": -1
             }
           ]
         }
@@ -1199,23 +1221,53 @@
       "options": [
         {
           "key": "A",
-          "label": "16-19岁",
-          "tags": []
+          "label": "16-18岁，爆发和恢复都很快，但比赛经验还在积累",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "Age Youth"
+            }
+          ]
         },
         {
           "key": "B",
-          "label": "20-29岁",
-          "tags": []
+          "label": "19-24岁，速度、体能和冲击力处于上升/高峰期",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "Age Peak"
+            }
+          ]
         },
         {
           "key": "C",
-          "label": "30-39岁",
-          "tags": []
+          "label": "25-32岁，身体、经验和稳定性最均衡",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "Age Prime"
+            }
+          ]
         },
         {
           "key": "D",
-          "label": "40岁以上",
-          "tags": []
+          "label": "33-39岁，经验更足，但恢复和连续冲刺会受影响",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "Age Mature"
+            }
+          ]
+        },
+        {
+          "key": "E",
+          "label": "40岁以上，更依赖节奏、站位和踢球智慧",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "Age Veteran"
+            }
+          ]
         }
       ],
       "type": "radio"
@@ -1226,23 +1278,53 @@
       "options": [
         {
           "key": "A",
-          "label": "半职业/准职业",
-          "tags": []
+          "label": "半职业/准职业，能适应高强度对抗和体系要求",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "Self Tier A"
+            }
+          ]
         },
         {
           "key": "B",
-          "label": "高水平业余",
-          "tags": []
+          "label": "高水平业余，常规野球局里通常是核心或大腿",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "Self Tier B"
+            }
+          ]
         },
         {
           "key": "C",
-          "label": "中等水平",
-          "tags": []
+          "label": "标准业余主力，位置感和基本技术稳定",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "Self Tier C"
+            }
+          ]
         },
         {
           "key": "D",
-          "label": "纯娱乐/酱油",
-          "tags": []
+          "label": "休闲中等水平，能参与配合但稳定性看状态",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "Self Tier D"
+            }
+          ]
+        },
+        {
+          "key": "E",
+          "label": "新手/纯娱乐/酱油，主要以参与和健康为主",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "Self Tier E"
+            }
+          ]
         }
       ],
       "type": "radio"

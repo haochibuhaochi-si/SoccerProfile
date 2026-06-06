@@ -426,6 +426,7 @@ body::before {
 
 .report-block {
   margin-bottom: 28px;
+  position: relative;
 }
 
 .report-block h3 {
@@ -457,10 +458,162 @@ body::before {
   padding-left: 18px;
 }
 
+.radar-shell {
+  position: relative;
+  padding: 12px 0 6px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 212, 255, 0.12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(0, 212, 255, 0.12), transparent 45%),
+    linear-gradient(145deg, rgba(18, 26, 43, 0.92), rgba(7, 11, 20, 0.88));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28), inset 0 0 32px rgba(0, 212, 255, 0.05);
+}
+
+.radar-shell::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  background: conic-gradient(from 140deg, transparent, rgba(0, 212, 255, 0.12), transparent, rgba(255, 107, 53, 0.1), transparent);
+  animation: radarSweep 8s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes radarSweep {
+  to { transform: rotate(360deg); }
+}
+
 #radar-canvas {
+  position: relative;
   display: block;
   margin: 0 auto;
   max-width: 100%;
+}
+
+.radar-caption {
+  position: relative;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  margin-top: -6px;
+  padding-bottom: 4px;
+}
+
+.deep-summary {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid rgba(0, 212, 255, 0.12);
+  border-radius: var(--radius);
+  background: rgba(0, 212, 255, 0.06);
+  color: var(--text) !important;
+}
+
+.insight-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.insight-card {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(18, 26, 43, 0.96), rgba(18, 26, 43, 0.62));
+}
+
+.insight-score {
+  flex: 0 0 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #0a0e17;
+  background: linear-gradient(135deg, var(--accent), #ffcf5a);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.insight-card strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.insight-card p {
+  margin: 0;
+}
+
+.analysis-panel {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border);
+}
+
+.analysis-panel h4 {
+  font-size: 0.9rem;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.match-script {
+  display: grid;
+  gap: 10px;
+}
+
+.script-row {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 10px;
+}
+
+.script-row span {
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.script-row p {
+  margin: 0;
+}
+
+.breakdown-list {
+  margin-top: 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+.breakdown-row span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.breakdown-row strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.breakdown-row .positive {
+  color: #48d597;
+}
+
+.breakdown-row .negative {
+  color: #ff8a65;
 }
 
 .disclaimer {
@@ -469,14 +622,63 @@ body::before {
   margin-bottom: 12px;
 }
 
-.avoid-ref {
-  opacity: 0.7;
-  font-style: italic;
+.reference-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.reference-card {
+  position: relative;
+  overflow: hidden;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: linear-gradient(145deg, rgba(18, 26, 43, 0.96), rgba(10, 14, 23, 0.78));
+}
+
+.reference-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 0%, rgba(0, 212, 255, 0.13), transparent 36%);
+  pointer-events: none;
+}
+
+.reference-card.core {
+  border-color: rgba(0, 212, 255, 0.22);
+}
+
+.reference-card.sub {
+  border-color: rgba(255, 207, 90, 0.2);
+}
+
+.reference-card.avoid {
+  opacity: 0.82;
+  border-color: rgba(255, 107, 53, 0.18);
+}
+
+.reference-card span {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 8px;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.reference-card p {
+  position: relative;
+  margin: 0;
 }
 
 .hybrid-ref {
   margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
   color: var(--accent) !important;
+  background: rgba(0, 212, 255, 0.07);
+  border: 1px solid rgba(0, 212, 255, 0.14);
 }
 
 .formation-fit {
@@ -492,6 +694,10 @@ body::before {
 
 @media (min-width: 400px) {
   .two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .insight-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
