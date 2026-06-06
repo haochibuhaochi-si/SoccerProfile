@@ -1002,45 +1002,61 @@
     },
     {
       "id": "S4",
-      "text": "在一场90分钟的比赛最后15分钟，你通常的状态是？",
+      "text": "在一场高强度比赛最后15分钟，以及下一次约球前，你通常的状态是？",
       "options": [
         {
           "key": "A",
-          "label": "还能冲刺，但会选择更省力的踢法（耐力强）",
+          "label": "还能冲刺，第二天恢复也快，基本不影响连续出场（耐力/可用性强）",
           "tags": [
             {
               "type": "exec",
               "value": "+0.2"
+            },
+            {
+              "type": "meta",
+              "value": "Availability Elite"
             }
           ]
         },
         {
           "key": "B",
-          "label": "喘得不行，但还能保持防守站位（及格）",
+          "label": "明显疲劳，但还能守住位置，休息后能正常参加下一场（稳定）",
           "tags": [
             {
               "type": "exec",
               "value": "0"
+            },
+            {
+              "type": "meta",
+              "value": "Availability Stable"
             }
           ]
         },
         {
           "key": "C",
-          "label": "只能慢走补位，基本不参与回防（耐力弱）",
+          "label": "只能慢走补位，赛后需要控制出场频率或保护旧伤（受限）",
           "tags": [
             {
               "type": "exec",
               "value": "-0.2"
+            },
+            {
+              "type": "meta",
+              "value": "Availability Managed"
             }
           ]
         },
         {
           "key": "D",
-          "label": "彻底跑不动，只想下场（透支）",
+          "label": "彻底跑不动，或经常因伤病/恢复问题影响出勤（高风险）",
           "tags": [
             {
               "type": "exec",
               "value": "-0.4"
+            },
+            {
+              "type": "meta",
+              "value": "Availability Risk"
             }
           ]
         }
@@ -1049,35 +1065,61 @@
     },
     {
       "id": "S5",
-      "text": "如果你因为临时有事缺席，你们队通常会？",
+      "text": "如果你缺席，或队长要求你守住固定职责，你们队通常会？",
       "options": [
         {
           "key": "A",
-          "label": "必须专门找人来顶替你的位置（核心）",
+          "label": "必须专门找人顶替；你也能严格执行职责，先保证球队结构（核心/纪律强）",
           "tags": [
             {
               "type": "meta",
               "value": "Reliability High"
+            },
+            {
+              "type": "meta",
+              "value": "Discipline Elite"
             }
           ]
         },
         {
           "key": "B",
-          "label": "有人能顶，但位置感和配合会乱（重要）",
+          "label": "有人能顶，但配合会乱；你大部分时间能执行任务（重要/纪律好）",
           "tags": [
             {
               "type": "meta",
               "value": "Reliability Med"
+            },
+            {
+              "type": "meta",
+              "value": "Discipline Good"
             }
           ]
         },
         {
           "key": "C",
-          "label": "谁都能踢那个位置，影响不大（边缘）",
+          "label": "谁都能踢那个位置；你更依赖个人判断，容易被机会吸走（边缘/纪律松）",
           "tags": [
             {
               "type": "meta",
               "value": "Reliability Low"
+            },
+            {
+              "type": "meta",
+              "value": "Discipline Loose"
+            }
+          ]
+        },
+        {
+          "key": "D",
+          "label": "你更适合自由发挥，不太适应固定任务（自由型）",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "Reliability Low"
+            },
+            {
+              "type": "meta",
+              "value": "Discipline Free"
             }
           ]
         }
@@ -1086,45 +1128,61 @@
     },
     {
       "id": "S6",
-      "text": "你上一次在正式比赛中因为个人失误（停球失误/带球被断）导致丢球，大概是多久前？",
+      "text": "你在正式比赛里出现个人失误，或最后10分钟比分胶着时，通常会？",
       "options": [
         {
           "key": "A",
-          "label": "最近3个月都没有（稳定）",
+          "label": "很少因个人失误丢球，关键时刻敢要球并承担最后一脚（稳定/大心脏）",
           "tags": [
             {
               "type": "exec",
               "value": "+0.2"
+            },
+            {
+              "type": "meta",
+              "value": "Mentality Clutch"
             }
           ]
         },
         {
           "key": "B",
-          "label": "一两个月前有一次（偶尔）",
+          "label": "偶尔失误，但关键时刻能保持平常心（可控）",
           "tags": [
             {
               "type": "exec",
               "value": "0"
+            },
+            {
+              "type": "meta",
+              "value": "Mentality Stable"
             }
           ]
         },
         {
           "key": "C",
-          "label": "每场比赛都有类似失误（不稳定）",
+          "label": "每场都有明显失误；关键阶段会更保守，优先避免犯错（谨慎）",
           "tags": [
             {
               "type": "exec",
               "value": "-0.2"
+            },
+            {
+              "type": "meta",
+              "value": "Mentality Cautious"
             }
           ]
         },
         {
           "key": "D",
-          "label": "我就是那个容易失误的点（高风险）",
+          "label": "容易成为失误点；关键阶段会急躁或上头（高风险）",
           "tags": [
             {
               "type": "exec",
               "value": "-0.4"
+            },
+            {
+              "type": "meta",
+              "value": "Mentality Tilt"
             }
           ]
         }
@@ -1133,45 +1191,61 @@
     },
     {
       "id": "S7",
-      "text": "当对方3-4人围抢你时，你的第一脚出球通常是？",
+      "text": "当对方3-4人围抢你，球还来到非惯用脚时，你通常是？",
       "options": [
         {
           "key": "A",
-          "label": "总能找到安全路线或护球脱困（抗压）",
+          "label": "能用任意脚找到安全路线或护球脱困（抗压/逆足强）",
           "tags": [
             {
               "type": "exec",
               "value": "+0.2"
+            },
+            {
+              "type": "meta",
+              "value": "WeakFoot Elite"
             }
           ]
         },
         {
           "key": "B",
-          "label": "大部分时候能处理，偶尔慌乱（尚可）",
+          "label": "大部分时候能处理，逆足短传和停球比较稳（尚可）",
           "tags": [
             {
               "type": "exec",
               "value": "0"
+            },
+            {
+              "type": "meta",
+              "value": "WeakFoot Good"
             }
           ]
         },
         {
           "key": "C",
-          "label": "经常只能大脚解围（挣扎）",
+          "label": "经常只能大脚解围，压力下会立刻换回惯用脚（挣扎）",
           "tags": [
             {
               "type": "exec",
               "value": "-0.2"
+            },
+            {
+              "type": "meta",
+              "value": "WeakFoot Basic"
             }
           ]
         },
         {
           "key": "D",
-          "label": "容易丢球或被断（崩溃）",
+          "label": "容易丢球或被断，逆足会明显影响动作质量（崩溃）",
           "tags": [
             {
               "type": "exec",
               "value": "-0.4"
+            },
+            {
+              "type": "meta",
+              "value": "WeakFoot Low"
             }
           ]
         }
@@ -1274,55 +1348,75 @@
     },
     {
       "id": "S10",
-      "text": "你自己认为目前的踢球水平属于？",
+      "text": "你自己认为目前的踢球水平，以及接受建议后的调整能力更接近？",
       "options": [
         {
           "key": "A",
-          "label": "半职业/准职业，能适应高强度对抗和体系要求",
+          "label": "半职业/准职业，能适应体系要求，也能快速吸收反馈（高水平/学习快）",
           "tags": [
             {
               "type": "meta",
               "value": "Self Tier A"
+            },
+            {
+              "type": "meta",
+              "value": "Coachability Elite"
             }
           ]
         },
         {
           "key": "B",
-          "label": "高水平业余，常规野球局里通常是核心或大腿",
+          "label": "高水平业余，常规野球局里是核心，愿意听建议并逐步调整（核心/可塑）",
           "tags": [
             {
               "type": "meta",
               "value": "Self Tier B"
+            },
+            {
+              "type": "meta",
+              "value": "Coachability Good"
             }
           ]
         },
         {
           "key": "C",
-          "label": "标准业余主力，位置感和基本技术稳定",
+          "label": "标准业余主力，基本技术稳定，但换位置或改习惯需要几场适应（主力/慢热）",
           "tags": [
             {
               "type": "meta",
               "value": "Self Tier C"
+            },
+            {
+              "type": "meta",
+              "value": "Coachability Slow"
             }
           ]
         },
         {
           "key": "D",
-          "label": "休闲中等水平，能参与配合但稳定性看状态",
+          "label": "休闲中等水平，能参与配合但稳定性看状态（休闲）",
           "tags": [
             {
               "type": "meta",
               "value": "Self Tier D"
+            },
+            {
+              "type": "meta",
+              "value": "Coachability Slow"
             }
           ]
         },
         {
           "key": "E",
-          "label": "新手/纯娱乐/酱油，主要以参与和健康为主",
+          "label": "新手/纯娱乐/酱油，主要以参与健康为主，暂时不追求复杂指导（娱乐）",
           "tags": [
             {
               "type": "meta",
               "value": "Self Tier E"
+            },
+            {
+              "type": "meta",
+              "value": "Coachability Low"
             }
           ]
         }

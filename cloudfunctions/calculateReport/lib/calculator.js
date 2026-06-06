@@ -124,6 +124,36 @@ const SELF_MOD = {
   'Self Tier D': -0.08,
   'Self Tier E': -0.18,
 };
+const WEAK_FOOT_MOD = {
+  'WeakFoot Elite': 0.18,
+  'WeakFoot Good': 0.08,
+  'WeakFoot Basic': -0.04,
+  'WeakFoot Low': -0.14,
+};
+const AVAILABILITY_MOD = {
+  'Availability Elite': 0.2,
+  'Availability Stable': 0.06,
+  'Availability Managed': -0.12,
+  'Availability Risk': -0.28,
+};
+const MENTALITY_MOD = {
+  'Mentality Clutch': 0.18,
+  'Mentality Stable': 0.06,
+  'Mentality Cautious': -0.04,
+  'Mentality Tilt': -0.18,
+};
+const DISCIPLINE_MOD = {
+  'Discipline Elite': 0.18,
+  'Discipline Good': 0.08,
+  'Discipline Loose': -0.08,
+  'Discipline Free': -0.16,
+};
+const COACHABILITY_MOD = {
+  'Coachability Elite': 0.18,
+  'Coachability Good': 0.08,
+  'Coachability Slow': -0.06,
+  'Coachability Low': -0.16,
+};
 const LITERACY_BONUS = { 4: 0.6, 3: 0.4, 2: 0.2, 1: 0.1 };
 const STYLE_EXEC_AXES = ['F3-Duels', 'F4-WorkRate', 'F2-Engagement', 'F2-Body', 'F5-Physical'];
 
@@ -132,9 +162,9 @@ function clamp(n, min, max) {
 }
 
 function getMetaModifier(opt, modMap) {
-  const meta = (opt?.tags || []).find((t) => t.type === 'meta');
+  const meta = (opt?.tags || []).find((t) => t.type === 'meta' && t.value in modMap);
   if (!meta) return 0;
-  return modMap[meta.value] ?? 0;
+  return modMap[meta.value];
 }
 
 /** 根据题库预计算每个轴的原始得分上下界 */
@@ -274,6 +304,11 @@ function computePlayLevel(intensityQuestions, intensityAnswers, literacyCorrect,
   const pitchMod = getMetaModifier(getOpt(7), PITCH_MOD);
   const ageMod = getMetaModifier(getOpt(8), AGE_MOD);
   const selfMod = getMetaModifier(getOpt(9), SELF_MOD);
+  const availabilityMod = getMetaModifier(getOpt(3), AVAILABILITY_MOD);
+  const disciplineMod = getMetaModifier(getOpt(4), DISCIPLINE_MOD);
+  const mentalityMod = getMetaModifier(getOpt(5), MENTALITY_MOD);
+  const weakFootMod = getMetaModifier(getOpt(6), WEAK_FOOT_MOD);
+  const coachabilityMod = getMetaModifier(getOpt(9), COACHABILITY_MOD);
 
   const execIndices = [3, 5, 6];
   let execSum = 0;
@@ -287,7 +322,21 @@ function computePlayLevel(intensityQuestions, intensityAnswers, literacyCorrect,
   const litBonus = LITERACY_BONUS[literacyCorrect] ?? 0;
   const styleMod = styleExecutionBonus(styleVector || {});
   const rawScore =
-    base + freqMod + peerMod + execMod + reliabilityMod + litBonus + pitchMod + ageMod + selfMod + styleMod;
+    base +
+    freqMod +
+    peerMod +
+    execMod +
+    reliabilityMod +
+    litBonus +
+    pitchMod +
+    ageMod +
+    selfMod +
+    styleMod +
+    weakFootMod +
+    availabilityMod +
+    mentalityMod +
+    disciplineMod +
+    coachabilityMod;
   const score = clamp(rawScore, 1, 10);
 
   return {
@@ -301,6 +350,11 @@ function computePlayLevel(intensityQuestions, intensityAnswers, literacyCorrect,
     pitchMod,
     ageMod,
     selfMod,
+    weakFootMod,
+    availabilityMod,
+    mentalityMod,
+    disciplineMod,
+    coachabilityMod,
     styleMod,
     raw_score: Math.round(rawScore * 1000) / 1000,
   };
@@ -329,25 +383,55 @@ function countLiteracyCorrect(literacyQuestions, literacyAnswers) {
   return n;
 }
 
-function buildRadarData(vector, q0Keys, prototypes) {
+function buildAxisCoverage(styleQuestions) {
+  const coverage = Object.fromEntries(AXES.map((a) => [a, 0]));
+  (styleQuestions || []).forEach((q) => {
+    const axesInQ = new Set();
+    q.options.forEach((opt) => {
+      (opt.tags || []).forEach((tag) => {
+        if (tag.type === 'axis' && tag.axis in coverage) axesInQ.add(tag.axis);
+      });
+    });
+    axesInQ.forEach((axis) => {
+      coverage[axis] += 1;
+    });
+  });
+  return coverage;
+}
+
+function radarVisualValue(raw, coverage, isActive) {
+  const confidence = Math.min(1, (coverage || 0) / 3);
+  const adjusted = raw * confidence + 5 * (1 - confidence);
+  const floor = isActive ? 2.8 : 4.2;
+  const visual = floor + (adjusted / 10) * (10 - floor);
+  return Math.round(clamp(visual, floor, 10) * 10) / 10;
+}
+
+function buildRadarData(vector, q0Keys, styleQuestions) {
   const selected = new Set(q0Keys || []);
   const primary = q0Keys?.[0] || 'midfielder';
   const familyByAxis = {
-    'F2': 'defender',
-    'F3': 'midfielder',
-    'F4': 'wing',
-    'F5': 'striker',
+    F2: 'defender',
+    F3: 'midfielder',
+    F4: 'wing',
+    F5: 'striker',
   };
+  const coverage = buildAxisCoverage(styleQuestions);
 
   return AXES.map((k) => {
     const family = familyByAxis[k.slice(0, 2)];
     const meta = AXIS_META[k];
+    const raw = Math.round((vector[k] ?? 5) * 10) / 10;
+    const active = selected.size ? selected.has(family) : family === primary;
     return {
-    axis: k,
+      axis: k,
+      family,
       label: meta?.short || k,
       full_label: meta?.label || k,
-    value: Math.round((vector[k] ?? 5) * 10) / 10,
-      active: selected.size ? selected.has(family) : family === primary,
+      value: raw,
+      visual_value: radarVisualValue(raw, coverage[k], active),
+      coverage: coverage[k],
+      active,
     };
   });
 }
@@ -359,25 +443,62 @@ function axisTone(axis, value) {
   return '处在均衡区间，说明你会根据比赛局面切换处理方式';
 }
 
-function buildAxisInsights(vector) {
-  const items = AXES.map((axis) => ({
-    axis,
-    label: AXIS_META[axis]?.label || axis,
-    value: Math.round((vector[axis] ?? 5) * 10) / 10,
-    tone: axisTone(axis, vector[axis] ?? 5),
-    advice: AXIS_META[axis]?.advice || '',
-  }));
+const FAMILY_BY_AXIS = {
+  F2: 'defender',
+  F3: 'midfielder',
+  F4: 'wing',
+  F5: 'striker',
+};
 
-  const byDistance = [...items].sort((a, b) => Math.abs(b.value - 5) - Math.abs(a.value - 5));
-  const top = [...items].sort((a, b) => b.value - a.value).slice(0, 3);
-  const bottom = [...items].sort((a, b) => a.value - b.value).slice(0, 2);
+const POSITION_LABELS = {
+  defender: '后卫',
+  midfielder: '中场',
+  wing: '边路',
+  striker: '前锋',
+};
+
+function buildAxisInsights(vector, q0Keys, styleQuestions) {
+  const selected = new Set(q0Keys?.length ? q0Keys : ['midfielder']);
+  const coverage = buildAxisCoverage(styleQuestions);
+  const activeLabel = (q0Keys || ['midfielder'])
+    .map((k) => POSITION_LABELS[k] || k)
+    .join('、');
+
+  const items = AXES.map((axis) => {
+    const family = FAMILY_BY_AXIS[axis.slice(0, 2)];
+    const active = selected.has(family);
+    const raw = Math.round((vector[axis] ?? 5) * 10) / 10;
+    const display = radarVisualValue(raw, coverage[axis], active);
+    return {
+      axis,
+      family,
+      active,
+      label: AXIS_META[axis]?.label || axis,
+      value: display,
+      raw_value: raw,
+      tone: axisTone(axis, display),
+      advice: AXIS_META[axis]?.advice || '',
+    };
+  });
+
+  const activePool = items.filter((item) => item.active);
+  const pool = activePool.length
+    ? activePool
+    : items.filter((item) => item.family === (q0Keys?.[0] || 'midfielder'));
+
+  const byDistance = [...pool].sort((a, b) => Math.abs(b.value - 5) - Math.abs(a.value - 5));
+  const top = [...pool].sort((a, b) => b.value - a.value).slice(0, 3);
+  const bottom = [...pool].sort((a, b) => a.value - b.value).slice(0, 2);
   const signatures = byDistance.slice(0, 4);
 
   return {
-    summary: `你的画像不是单一位置标签，而是由 ${signatures.map((i) => i.label).join('、')} 共同构成的比赛习惯。分数越偏离 5，说明这个维度越像你的稳定本能。`,
+    position_focus: activeLabel,
+    axis_count: pool.length,
+    summary: `以下解析聚焦你选择的「${activeLabel}」相关维度（${pool.length} 项）。风格星图仍保留 12 维全场全景；展示分经平滑处理，避免少量题目导致的 0/10 极端值。你的核心习惯由 ${signatures.map((i) => i.label).join('、')} 共同构成。`,
     signatures,
     dominant_traits: top,
     growth_edges: bottom,
+    panorama_axes: items.filter((item) => !item.active),
   };
 }
 
@@ -385,6 +506,10 @@ function pickAxis(vector, axes) {
   return axes
     .map((axis) => ({ axis, value: vector[axis] ?? 5 }))
     .sort((a, b) => b.value - a.value)[0];
+}
+
+function averageAxes(vector, axes) {
+  return axes.reduce((sum, axis) => sum + (vector[axis] ?? 5), 0) / axes.length;
 }
 
 function buildMatchScript(vector, match, play, literacyBand) {
@@ -423,15 +548,104 @@ function buildPlayBreakdown(play) {
     { label: '场地条件', value: play.pitchMod, impact: play.pitchMod },
     { label: '年龄体能', value: play.ageMod, impact: play.ageMod },
     { label: '自评校准', value: play.selfMod, impact: play.selfMod },
+    { label: '逆足能力', value: play.weakFootMod, impact: play.weakFootMod },
+    { label: '出勤可用性', value: play.availabilityMod, impact: play.availabilityMod },
+    { label: '关键心态', value: play.mentalityMod, impact: play.mentalityMod },
+    { label: '战术纪律', value: play.disciplineMod, impact: play.disciplineMod },
+    { label: '学习适配', value: play.coachabilityMod, impact: play.coachabilityMod },
     { label: '风格执行画像', value: play.styleMod, impact: play.styleMod },
   ];
 }
 
-function buildDeepReport(vector, match, play, literacyBand) {
+function normalizeScore(n) {
+  return Math.round(clamp(n, 1, 10) * 10) / 10;
+}
+
+function scoreBand(score) {
+  if (score >= 8.5) return '突出';
+  if (score >= 7) return '良好';
+  if (score >= 5.5) return '可用';
+  if (score >= 4) return '待提升';
+  return '明显短板';
+}
+
+function buildScoutProfile(vector, play, literacyCorrect) {
+  const technical = normalizeScore(
+    averageAxes(vector, ['F2-Distribution', 'F3-Tempo', 'F4-Mode', 'F5-HoldUp', 'F5-Physical']) +
+      play.weakFootMod * 4,
+  );
+  const physical = normalizeScore(
+    averageAxes(vector, ['F2-Body', 'F3-Duels', 'F4-WorkRate', 'F5-Physical']) +
+      play.execMod * 1.6 +
+      play.ageMod * 3,
+  );
+  const tactical = normalizeScore(
+    4.4 +
+      literacyCorrect * 1.1 +
+      play.disciplineMod * 5 +
+      (averageAxes(vector, ['F2-Distribution', 'F3-Tempo', 'F3-Territory', 'F4-Width']) - 5) * 0.25,
+  );
+  const mentality = normalizeScore(
+    5 +
+      play.mentalityMod * 6 +
+      play.coachabilityMod * 5 +
+      play.reliabilityMod * 2,
+  );
+  const availability = normalizeScore(
+    5 +
+      play.availabilityMod * 10 +
+      play.freqMod * 2 +
+      play.pitchMod * 2,
+  );
+
+  const dimensions = [
+    {
+      key: 'technical',
+      label: '技术完整度',
+      score: technical,
+      desc: '结合出球、节奏、边路处理、支点与终结，再用逆足能力校准。',
+    },
+    {
+      key: 'physical',
+      label: '身体与执行',
+      score: physical,
+      desc: '结合对抗、往返、身体工具、终结爆发，以及体能与年龄状态。',
+    },
+    {
+      key: 'tactical',
+      label: '战术理解',
+      score: tactical,
+      desc: '结合战术素养答题、纪律性和空间/节奏相关风格轴。',
+    },
+    {
+      key: 'mentality',
+      label: '心态与可培养性',
+      score: mentality,
+      desc: '结合关键时刻心态、学习适配和位置可靠性。',
+    },
+    {
+      key: 'availability',
+      label: '可出勤性',
+      score: availability,
+      desc: '结合出勤伤病、踢球频率和常见场地风险。',
+    },
+  ].map((d) => ({ ...d, band: scoreBand(d.score) }));
+
+  const sorted = [...dimensions].sort((a, b) => b.score - a.score);
   return {
-    axis_insights: buildAxisInsights(vector),
+    dimensions,
+    scout_summary: `从球探视角看，你最值得被标记的是「${sorted[0].label}」，当前最需要管理的是「${sorted[sorted.length - 1].label}」。`,
+    strongest: sorted[0],
+    weakest: sorted[sorted.length - 1],
+  };
+}
+
+function buildDeepReport(vector, match, play, literacyBand, literacyCorrect, q0Keys, styleQuestions) {
+  return {
+    axis_insights: buildAxisInsights(vector, q0Keys, styleQuestions),
     match_script: buildMatchScript(vector, match, play, literacyBand),
     playlevel_breakdown: buildPlayBreakdown(play),
+    scout_profile: buildScoutProfile(vector, play, literacyCorrect),
   };
 }
 
@@ -507,9 +721,10 @@ function calculateReport(payload) {
   );
 
   const archBase = copyPack.archetypes[match.archetype_id]?.base;
-  const deepReport = buildDeepReport(styleVec, match, play, literacyBand);
+  const deepReport = buildDeepReport(styleVec, match, play, literacyBand, litCorrect, q0, questions.style);
 
   return {
+    q0_positions: q0,
     archetype_id: match.archetype_id,
     archetype_title: copyData?.title || archBase?.title,
     is_hybrid: match.is_hybrid,
@@ -520,7 +735,7 @@ function calculateReport(payload) {
     intensity_band: intensityBand,
     literacy_band: literacyBand,
     literacy_correct: litCorrect,
-    radar_data: buildRadarData(styleVec, q0, prototypes),
+    radar_data: buildRadarData(styleVec, q0, questions.style),
     style_vector: styleVec,
     deep_report: deepReport,
     copy_data: copyData,
