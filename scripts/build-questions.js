@@ -30,6 +30,7 @@ function parseTags(tagStr) {
       let delta = 0;
       if (sign === '+') delta = 1;
       else if (sign === '-') delta = -1;
+      else if (sign === '=') delta = 0;
       tags.push({ type: 'axis', axis, delta });
     } else {
       tags.push({ type: 'meta', value: raw });
@@ -45,7 +46,7 @@ for (let i = 0; i < lines.length; i++) {
   else if (line.includes('Part 2')) section = 'intensity';
   else if (line.includes('Part 3')) section = 'literacy';
 
-  const qMatch = line.match(/^\*\*(Q\d+|S\d+|K\d+)\./);
+  const qMatch = line.match(/^\*\*(Q\d+|P\d+|S\d+|K\d+)\./);
   if (qMatch) {
     const id = qMatch[1];
     let text = line.replace(/^\*\*[^*]+\*\*\s*/, '').replace(/\*\*/g, '');
@@ -76,6 +77,9 @@ for (let i = 0; i < lines.length; i++) {
     const tagPart = optMatch[3] || '';
     const tags = tagPart ? parseTags(tagPart) : [];
     current.options.push({ key, label, tags });
+    if (section === 'literacy' && tagPart.includes('correct')) {
+      current.correctKey = key;
+    }
   }
 
   const checkboxMatch = line.match(/^\*\s*\[\s*\]\s*(.+)$/);
@@ -87,10 +91,9 @@ for (let i = 0; i < lines.length; i++) {
   }
 }
 
-// K 题正确答案
-const correct = { K1: 'B', K2: 'B', K3: 'B', K4: 'B', K5: 'C' };
+// K 题正确答案（优先从 [correct] 标签读取）
 questions.literacy.forEach((q) => {
-  q.correctKey = correct[q.id] || 'B';
+  if (!q.correctKey) q.correctKey = 'B';
 });
 
 const out = path.join(__dirname, '../data/questions.json');

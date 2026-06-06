@@ -1,5 +1,5 @@
 /**
- * 足球风格测试 - 核心计算逻辑
+ * 足球风格测试 - 核心计算逻辑（优化版）
  */
 const fs = require('fs');
 const path = require('path');
@@ -19,27 +19,48 @@ const AXES = [
 
 const ENV_BASE = { A: 8.0, 'B+': 6.5, B: 5.0, C: 3.5, D: 2.0 };
 const EXEC_MOD = { '+0.2': 0.3, '0': 0, '-0.2': -0.3, '-0.4': -0.5 };
-const LITERACY_BONUS = { 5: 0.8, 4: 0.5, 3: 0.2 };
+const FREQ_MOD = { 'Freq High': 0.5, 'Freq Med': 0.2, 'Freq Low': 0, 'Freq Rare': -0.3 };
+const PEER_MOD = { 'Peer Level High': 0.4, 'Peer Level Med': 0.1, 'Peer Level Low': -0.2 };
+const RELIABILITY_MOD = { 'Reliability High': 0.3, 'Reliability Med': 0.1, 'Reliability Low': -0.2 };
+const PITCH_MOD = { 'Env Bonus': 0.1, 'Env Neutral': 0, 'Env Penalty': -0.1 };
+const LITERACY_BONUS = { 4: 0.6, 3: 0.4, 2: 0.2 };
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
 }
 
-/** 从答题记录构建 style 题答案映射 */
-function buildStyleAnswerMap(answers, questions) {
-  const map = {};
-  questions.style.forEach((q, idx) => {
-    const key = answers.style?.[idx] ?? answers[`style_${idx}`];
-    if (!key) return;
-    const opt = q.options.find((o) => o.key === key);
-    if (opt) map[q.id] = opt;
+function getMetaModifier(opt, modMap) {
+  const meta = (opt?.tags || []).find((t) => t.type === 'meta');
+  if (!meta) return 0;
+  return modMap[meta.value] ?? 0;
+}
+
+/** 根据题库预计算每个轴的原始得分上下界 */
+function buildAxisBounds(styleQuestions) {
+  const bounds = Object.fromEntries(AXES.map((a) => [a, { min: 0, max: 0 }]));
+
+  styleQuestions.forEach((q) => {
+    const perQuestion = {};
+    q.options.forEach((opt) => {
+      (opt.tags || []).forEach((tag) => {
+        if (tag.type !== 'axis' || !(tag.axis in bounds)) return;
+        if (!perQuestion[tag.axis]) perQuestion[tag.axis] = { min: Infinity, max: -Infinity };
+        perQuestion[tag.axis].min = Math.min(perQuestion[tag.axis].min, tag.delta);
+        perQuestion[tag.axis].max = Math.max(perQuestion[tag.axis].max, tag.delta);
+      });
+    });
+    Object.entries(perQuestion).forEach(([axis, { min, max }]) => {
+      bounds[axis].min += min;
+      bounds[axis].max += max;
+    });
   });
-  return map;
+
+  return bounds;
 }
 
 function computeStyleVector(styleQuestions, styleAnswers) {
+  const bounds = buildAxisBounds(styleQuestions);
   const sums = Object.fromEntries(AXES.map((a) => [a, 0]));
-  const counts = Object.fromEntries(AXES.map((a) => [a, 0]));
 
   styleQuestions.forEach((q, idx) => {
     const key = styleAnswers[idx];
@@ -47,22 +68,20 @@ function computeStyleVector(styleQuestions, styleAnswers) {
     const opt = q.options.find((o) => o.key === key);
     if (!opt) return;
     (opt.tags || []).forEach((tag) => {
-      if (tag.type !== 'axis') return;
-      if (!sums[tag.axis]) return;
+      if (tag.type !== 'axis' || !(tag.axis in sums)) return;
       sums[tag.axis] += tag.delta;
-      counts[tag.axis] += 1;
     });
   });
 
   const vector = {};
   AXES.forEach((axis) => {
-    const c = counts[axis] || 0;
-    if (c === 0) {
+    const { min, max } = bounds[axis];
+    const range = max - min;
+    if (range === 0) {
       vector[axis] = 5;
       return;
     }
-    const raw = sums[axis] / c;
-    vector[axis] = clamp(((raw + 1) / 2) * 10, 0, 10);
+    vector[axis] = clamp(((sums[axis] - min) / range) * 10, 0, 10);
   });
   return vector;
 }
@@ -71,17 +90,17 @@ function vectorToArray(vector) {
   return AXES.map((a) => vector[a]);
 }
 
-function euclideanDistance(a, b) {
-  let sum = 0;
+function cosineSimilarity(a, b) {
+  let dot = 0;
+  let normA = 0;
+  let normB = 0;
   for (let i = 0; i < a.length; i++) {
-    const d = a[i] - b[i];
-    sum += d * d;
+    dot += a[i] * b[i];
+    normA += a[i] * a[i];
+    normB += b[i] * b[i];
   }
-  return Math.sqrt(sum);
-}
-
-function similarityFromDistance(dist, maxDist = 17.32) {
-  return clamp(1 - dist / maxDist, 0, 1);
+  if (normA === 0 || normB === 0) return 0;
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
 function getCandidatePool(q0Keys, prototypes) {
@@ -103,21 +122,20 @@ function matchArchetypes(userVec, q0Keys, prototypes) {
   const ranked = allIds
     .map((id) => {
       const proto = prototypes.prototypes[id];
-      const dist = euclideanDistance(userArr, proto);
-      return { id, dist, similarity: similarityFromDistance(dist) };
+      const similarity = cosineSimilarity(userArr, proto);
+      return { id, similarity };
     })
-    .sort((a, b) => a.dist - b.dist);
+    .sort((a, b) => b.similarity - a.similarity);
 
   const pool = getCandidatePool(q0Keys, prototypes);
   const primary = ranked.find((r) => pool.includes(r.id)) || ranked[0];
   const secondary = ranked.find((r) => r.id !== primary.id) || ranked[1];
 
   const hybridPct =
-    primary.dist > 0
-      ? clamp(((secondary.dist - primary.dist) / primary.dist) * 100, 0, 100)
+    primary.similarity > 0
+      ? clamp((secondary.similarity / primary.similarity) * 100, 0, 100)
       : 0;
-  const isHybrid =
-    secondary.similarity > 0.85 || hybridPct > 15;
+  const isHybrid = secondary.similarity >= primary.similarity * 0.85;
 
   return {
     archetype_id: primary.id,
@@ -131,22 +149,27 @@ function matchArchetypes(userVec, q0Keys, prototypes) {
 
 function computePlayLevel(intensityQuestions, intensityAnswers, literacyCorrect) {
   let base = 5.0;
-  const s1 = intensityAnswers[0];
-  const s1q = intensityQuestions[0];
-  if (s1q && s1) {
-    const opt = s1q.options.find((o) => o.key === s1);
-    const tierTag = (opt?.tags || []).find((t) => t.type === 'env_tier');
-    if (tierTag) base = ENV_BASE[tierTag.value] ?? 5.0;
-  }
+  const getOpt = (idx) => {
+    const q = intensityQuestions[idx];
+    const key = intensityAnswers[idx];
+    if (!q || !key) return null;
+    return q.options.find((o) => o.key === key);
+  };
+
+  const s1Opt = getOpt(0);
+  const tierTag = (s1Opt?.tags || []).find((t) => t.type === 'env_tier');
+  if (tierTag) base = ENV_BASE[tierTag.value] ?? 5.0;
+
+  const freqMod = getMetaModifier(getOpt(1), FREQ_MOD);
+  const peerMod = getMetaModifier(getOpt(2), PEER_MOD);
+  const reliabilityMod = getMetaModifier(getOpt(4), RELIABILITY_MOD);
+  const pitchMod = getMetaModifier(getOpt(7), PITCH_MOD);
 
   const execIndices = [3, 5, 6];
   let execSum = 0;
   let execCount = 0;
   execIndices.forEach((idx) => {
-    const key = intensityAnswers[idx];
-    const q = intensityQuestions[idx];
-    if (!key || !q) return;
-    const opt = q.options.find((o) => o.key === key);
+    const opt = getOpt(idx);
     const tag = (opt?.tags || []).find((t) => t.type === 'exec');
     if (tag) {
       execSum += EXEC_MOD[tag.value] ?? 0;
@@ -156,19 +179,33 @@ function computePlayLevel(intensityQuestions, intensityAnswers, literacyCorrect)
   const execMod = execCount ? execSum / execCount : 0;
 
   const litBonus = LITERACY_BONUS[literacyCorrect] ?? 0;
-  const score = clamp(base + execMod + litBonus, 1, 10);
-  return { playlevel_score: Math.round(score * 10) / 10, base, execMod, litBonus };
+  const score = clamp(
+    base + freqMod + peerMod + execMod + reliabilityMod + litBonus + pitchMod,
+    1,
+    10,
+  );
+
+  return {
+    playlevel_score: Math.round(score * 10) / 10,
+    base,
+    freqMod,
+    peerMod,
+    execMod,
+    reliabilityMod,
+    litBonus,
+    pitchMod,
+  };
 }
 
 function mapIntensityBand(score) {
-  if (score >= 7.5) return 'TIER_A';
-  if (score >= 5.5) return 'TIER_B';
+  if (score >= 8.5) return 'TIER_A';
+  if (score >= 6.5) return 'TIER_B';
   if (score >= 4.0) return 'TIER_C';
   return 'TIER_D';
 }
 
 function mapLiteracyBand(correctCount) {
-  if (correctCount >= 5) return 'LIT_HIGH';
+  if (correctCount >= 4) return 'LIT_HIGH';
   if (correctCount >= 3) return 'LIT_MID';
   return 'LIT_LOW';
 }
@@ -266,7 +303,7 @@ function calculateReport(payload) {
     match.secondary_id,
     match.is_hybrid,
     intensityBand,
-    literacyBand
+    literacyBand,
   );
 
   const archBase = copyPack.archetypes[match.archetype_id]?.base;

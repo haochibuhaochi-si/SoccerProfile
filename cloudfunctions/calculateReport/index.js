@@ -8,7 +8,7 @@ exports.main = async (event) => {
     const body = typeof event === 'string' ? JSON.parse(event) : event;
     const payload = body.data || body;
 
-    if (!payload || !Array.isArray(payload.style) || payload.style.length < 30) {
+    if (!payload || !Array.isArray(payload.style) || payload.style.length < 21) {
       return {
         code: 400,
         message: '请完成全部风格题后再提交',

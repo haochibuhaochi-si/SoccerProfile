@@ -29,12 +29,12 @@
   },
   "style": [
     {
-      "id": "Q1",
-      "text": "你在后场拿球，对方前锋正在上前逼抢，你的第一反应是？",
+      "id": "P1",
+      "text": "你在后场拿球，对方前锋正在上前逼抢，身边接应点较少，你的第一反应是？",
       "options": [
         {
           "key": "A",
-          "label": "直接大脚解围，把球送到前场（安全）",
+          "label": "直接大脚解围或回传门将（安全）",
           "tags": [
             {
               "type": "axis",
@@ -45,7 +45,7 @@
         },
         {
           "key": "B",
-          "label": "扣球转身，尝试从另一条路带球推进（冒险）",
+          "label": "扣球转身，尝试带球突围（冒险）",
           "tags": [
             {
               "type": "axis",
@@ -67,7 +67,7 @@
         },
         {
           "key": "D",
-          "label": "抬头找那个有空档的中场，尝试直塞（穿透）",
+          "label": "抬头找有空档的中场，尝试直塞（穿透）",
           "tags": [
             {
               "type": "axis",
@@ -80,7 +80,7 @@
       "type": "radio"
     },
     {
-      "id": "Q2",
+      "id": "P2",
       "text": "你在对方半场拿球，面前是一片开阔地，但你的中场队友正在回追要球，你会？",
       "options": [
         {
@@ -107,7 +107,7 @@
         },
         {
           "key": "C",
-          "label": "横向盘带寻找机会，不轻易向前冒险（规避duel）",
+          "label": "横向盘带寻找机会，不轻易向前冒险（规避对抗）",
           "tags": [
             {
               "type": "axis",
@@ -131,7 +131,7 @@
       "type": "radio"
     },
     {
-      "id": "Q3",
+      "id": "P3",
       "text": "你在边路拿球，下底路线被封堵，你通常是？",
       "options": [
         {
@@ -166,52 +166,23 @@
               "delta": -1
             }
           ]
-        }
-      ],
-      "type": "radio"
-    },
-    {
-      "id": "Q4",
-      "text": "队友在禁区前沿送出一记过顶球，你反越位成功，面对门将，你倾向于？",
-      "options": [
+        },
         {
-          "key": "A",
-          "label": "胸部停球后调整一下再射（一脚出球）",
+          "key": "D",
+          "label": "内收肋部，寻求中路配合（内收）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F5-Movement",
+              "axis": "F4-Width",
               "delta": -1
             }
           ]
-        },
-        {
-          "key": "B",
-          "label": "不停球直接凌空抽射（抢点）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F5-Movement",
-              "delta": 1
-            }
-          ]
-        },
-        {
-          "key": "C",
-          "label": "护住球，等待队友插上（背身护球）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F5-HoldUp",
-              "delta": 1
-            }
-          ]
         }
       ],
       "type": "radio"
     },
     {
-      "id": "Q5",
+      "id": "P4",
       "text": "我方进攻被断，瞬间由攻转守，此时你应该？",
       "options": [
         {
@@ -238,7 +209,7 @@
         },
         {
           "key": "C",
-          "label": "回防至中场区域，准备拦截或延误对方推进（平衡/过渡）",
+          "label": "回防至中场区域，准备拦截或延误对方推进（平衡过渡）",
           "tags": [
             {
               "type": "axis",
@@ -246,12 +217,23 @@
               "delta": 0
             }
           ]
+        },
+        {
+          "key": "D",
+          "label": "若对方形成单刀，必要时战术犯规（极限选择）",
+          "tags": [
+            {
+              "type": "axis",
+              "axis": "F2-Engagement",
+              "delta": 1
+            }
+          ]
         }
       ],
       "type": "radio"
     },
     {
-      "id": "Q6",
+      "id": "P5",
       "text": "在一次争抢中，你和对方球员身体接触，你感觉？",
       "options": [
         {
@@ -291,7 +273,7 @@
       "type": "radio"
     },
     {
-      "id": "Q7",
+      "id": "P6",
       "text": "对方防线压得很上，你在本方半场拿球，最好的选择是？",
       "options": [
         {
@@ -307,7 +289,7 @@
         },
         {
           "key": "B",
-          "label": "长传找到前插的边锋（穿透）",
+          "label": "长传找到前插的边锋或直接转移弱侧（穿透）",
           "tags": [
             {
               "type": "axis",
@@ -331,8 +313,8 @@
       "type": "radio"
     },
     {
-      "id": "Q8",
-      "text": "你的队友持球在边路，你作为前锋，通常会？",
+      "id": "P7",
+      "text": "你的队友持球在边路，你作为前锋或攻击手，通常会？",
       "options": [
         {
           "key": "A",
@@ -366,12 +348,23 @@
               "delta": 1
             }
           ]
+        },
+        {
+          "key": "D",
+          "label": "前插对方防线身后，寻求直塞（前插）",
+          "tags": [
+            {
+              "type": "axis",
+              "axis": "F3-Territory",
+              "delta": 1
+            }
+          ]
         }
       ],
       "type": "radio"
     },
     {
-      "id": "Q9",
+      "id": "P8",
       "text": "对方边锋速度很快，你作为边后卫，会？",
       "options": [
         {
@@ -411,7 +404,7 @@
       "type": "radio"
     },
     {
-      "id": "Q10",
+      "id": "P9",
       "text": "你刚传球失误，对方拿到了球，你的第一反应是？",
       "options": [
         {
@@ -438,7 +431,7 @@
         },
         {
           "key": "C",
-          "label": "大声提醒队友补位（辅助）",
+          "label": "大声提醒队友补位，或迅速盯防对方关键球员（辅助/盯人）",
           "tags": [
             {
               "type": "axis",
@@ -451,7 +444,47 @@
       "type": "radio"
     },
     {
-      "id": "Q11",
+      "id": "P10",
+      "text": "队友射门被扑出，或者禁区前沿送来过顶球，你会？",
+      "options": [
+        {
+          "key": "A",
+          "label": "第一时间冲上去补射或直接凌空抽射（抢点嗅觉）",
+          "tags": [
+            {
+              "type": "axis",
+              "axis": "F5-Movement",
+              "delta": 1
+            }
+          ]
+        },
+        {
+          "key": "B",
+          "label": "停球调整后再射，或护住球等待队友插上（稳健/支点）",
+          "tags": [
+            {
+              "type": "axis",
+              "axis": "F5-HoldUp",
+              "delta": 1
+            }
+          ]
+        },
+        {
+          "key": "C",
+          "label": "留在原地，防止对方反击（稳健防守）",
+          "tags": [
+            {
+              "type": "axis",
+              "axis": "F5-Movement",
+              "delta": -1
+            }
+          ]
+        }
+      ],
+      "type": "radio"
+    },
+    {
+      "id": "P11",
       "text": "你获得单刀机会，面对门将，你更相信？",
       "options": [
         {
@@ -480,65 +513,7 @@
       "type": "radio"
     },
     {
-      "id": "Q12",
-      "text": "一侧进攻受阻，你需要转移到另一侧，你会？",
-      "options": [
-        {
-          "key": "A",
-          "label": "用最舒服的方式，短传过渡（稳）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F2-Distribution",
-              "delta": -1
-            }
-          ]
-        },
-        {
-          "key": "B",
-          "label": "一脚精准长传，直接找远端队友（穿透）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F2-Distribution",
-              "delta": 1
-            }
-          ]
-        }
-      ],
-      "type": "radio"
-    },
-    {
-      "id": "Q13",
-      "text": "队友射门被扑，你会？",
-      "options": [
-        {
-          "key": "A",
-          "label": "第一时间冲上去补射（嗅觉）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F5-Movement",
-              "delta": 1
-            }
-          ]
-        },
-        {
-          "key": "B",
-          "label": "留在原地，防止对方反击（稳健）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F5-Movement",
-              "delta": -1
-            }
-          ]
-        }
-      ],
-      "type": "radio"
-    },
-    {
-      "id": "Q14",
+      "id": "P12",
       "text": "你接到后卫的传球，此时中场空档很大，你会？",
       "options": [
         {
@@ -567,7 +542,7 @@
       "type": "radio"
     },
     {
-      "id": "Q15",
+      "id": "P13",
       "text": "对方角球，你负责盯人，你会？",
       "options": [
         {
@@ -596,36 +571,7 @@
       "type": "radio"
     },
     {
-      "id": "Q16",
-      "text": "比赛进行到第80分钟，你体力透支，你会？",
-      "options": [
-        {
-          "key": "A",
-          "label": "咬牙坚持，保持跑位（意志力）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F4-WorkRate",
-              "delta": 1
-            }
-          ]
-        },
-        {
-          "key": "B",
-          "label": "减少跑动，节省体力（养生）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F4-WorkRate",
-              "delta": -1
-            }
-          ]
-        }
-      ],
-      "type": "radio"
-    },
-    {
-      "id": "Q17",
+      "id": "P14",
       "text": "作为中后卫，你如何指挥防线？",
       "options": [
         {
@@ -654,36 +600,7 @@
       "type": "radio"
     },
     {
-      "id": "Q18",
-      "text": "教练让你下半场多传球，你会？",
-      "options": [
-        {
-          "key": "A",
-          "label": "增加传球次数，减少个人突破（团队）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F3-Tempo",
-              "delta": -1
-            }
-          ]
-        },
-        {
-          "key": "B",
-          "label": "寻找更多机会，尝试个人突破（个人）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F3-Tempo",
-              "delta": 1
-            }
-          ]
-        }
-      ],
-      "type": "radio"
-    },
-    {
-      "id": "Q19",
+      "id": "P15",
       "text": "你方断球，发动反击，你作为中场，第一传应该？",
       "options": [
         {
@@ -712,36 +629,7 @@
       "type": "radio"
     },
     {
-      "id": "Q20",
-      "text": "距离球门25米的直接任意球，你会？",
-      "options": [
-        {
-          "key": "A",
-          "label": "直接射门（冒险）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F2-Distribution",
-              "delta": 1
-            }
-          ]
-        },
-        {
-          "key": "B",
-          "label": "传球给位置更好的队友（安全）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F2-Distribution",
-              "delta": -1
-            }
-          ]
-        }
-      ],
-      "type": "radio"
-    },
-    {
-      "id": "Q21",
+      "id": "P16",
       "text": "背身拿球，对方后卫紧贴着你，你会？",
       "options": [
         {
@@ -770,65 +658,7 @@
       "type": "radio"
     },
     {
-      "id": "Q22",
-      "text": "你是最后一名防守队员，对方单刀，你会？",
-      "options": [
-        {
-          "key": "A",
-          "label": "放倒他，阻止单刀（战术犯规）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F2-Engagement",
-              "delta": 1
-            }
-          ]
-        },
-        {
-          "key": "B",
-          "label": "退守封堵角度，期待门将扑救（稳健）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F2-Engagement",
-              "delta": -1
-            }
-          ]
-        }
-      ],
-      "type": "radio"
-    },
-    {
-      "id": "Q23",
-      "text": "比分落后时，你的踢球风格会？",
-      "options": [
-        {
-          "key": "A",
-          "label": "更加积极，敢于冒险（激进）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F3-Tempo",
-              "delta": 1
-            }
-          ]
-        },
-        {
-          "key": "B",
-          "label": "更加谨慎，避免失误（保守）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F3-Tempo",
-              "delta": -1
-            }
-          ]
-        }
-      ],
-      "type": "radio"
-    },
-    {
-      "id": "Q24",
+      "id": "P17",
       "text": "你作为边后卫插上助攻，传中后你应该？",
       "options": [
         {
@@ -857,7 +687,7 @@
       "type": "radio"
     },
     {
-      "id": "Q25",
+      "id": "P18",
       "text": "你主罚点球，你更可能？",
       "options": [
         {
@@ -886,7 +716,7 @@
       "type": "radio"
     },
     {
-      "id": "Q26",
+      "id": "P19",
       "text": "队友给你做墙，你更希望他？",
       "options": [
         {
@@ -915,23 +745,12 @@
       "type": "radio"
     },
     {
-      "id": "Q27",
-      "text": "比赛还剩5分钟，你方领先一球，你会？",
+      "id": "P20",
+      "text": "比赛不同阶段，你的心态如何变化？",
       "options": [
         {
           "key": "A",
-          "label": "拖延时间，控球为主（消耗）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F3-Tempo",
-              "delta": -1
-            }
-          ]
-        },
-        {
-          "key": "B",
-          "label": "继续进攻，争取扩大比分（进取）",
+          "label": "比分领先时，我会控球拖延时间；比分落后时，我会更加冒险（极端调整）",
           "tags": [
             {
               "type": "axis",
@@ -939,32 +758,25 @@
               "delta": 1
             }
           ]
-        }
-      ],
-      "type": "radio"
-    },
-    {
-      "id": "Q28",
-      "text": "对方控球，你在中场防守时，更偏向？",
-      "options": [
+        },
         {
-          "key": "A",
-          "label": "盯住对方核心球员（盯人）",
+          "key": "B",
+          "label": "无论比分如何，我都保持原有节奏（稳定）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F3-Duels",
-              "delta": 1
+              "axis": "F3-Tempo",
+              "delta": 0
             }
           ]
         },
         {
-          "key": "B",
-          "label": "保护己方防线的空档（区域）",
+          "key": "C",
+          "label": "领先时继续进攻，落后时反而更谨慎（反向调整）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F3-Duels",
+              "axis": "F3-Tempo",
               "delta": -1
             }
           ]
@@ -973,36 +785,7 @@
       "type": "radio"
     },
     {
-      "id": "Q29",
-      "text": "对方高位逼抢，你作为后卫拿球，身边没有接应点，你会？",
-      "options": [
-        {
-          "key": "A",
-          "label": "强行带球突围（冒险）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F2-Engagement",
-              "delta": 1
-            }
-          ]
-        },
-        {
-          "key": "B",
-          "label": "回传给门将（安全）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F2-Distribution",
-              "delta": -1
-            }
-          ]
-        }
-      ],
-      "type": "radio"
-    },
-    {
-      "id": "Q30",
+      "id": "P21",
       "text": "一场比赛结束后，你更可能因为什么而感到满足？",
       "options": [
         {
@@ -1468,62 +1251,39 @@
   "literacy": [
     {
       "id": "K1",
-      "text": "当对手在后场组织进攻时，高位逼抢体系（如瓜迪奥拉的曼城或克洛普的利物浦）通常会有意诱导对方将球传到边线或某个特定区域，然后进行围剿。这个战术区域的术语通常被称为？",
+      "text": "高位逼抢时，球队应该优先逼迫对手将球转移到哪一区域，以便利用边线进行围剿？",
       "options": [
         {
           "key": "A",
-          "label": "压迫盲区（Pressing Blind Spot）",
-          "tags": []
+          "label": "边线附近",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "correct"
+            }
+          ]
         },
         {
           "key": "B",
-          "label": "战术甜区 / 强制区域（The Forcing Zone / Red Zone）",
+          "label": "中路腹地",
           "tags": []
         },
         {
           "key": "C",
-          "label": "安全回传走廊（Safety Corridor）",
+          "label": "回传门将",
           "tags": []
         },
         {
           "key": "D",
-          "label": "控球陷阱（Possession Trap）",
+          "label": "任意方向",
           "tags": []
         }
       ],
       "type": "radio",
-      "correctKey": "B"
+      "correctKey": "A"
     },
     {
       "id": "K2",
-      "text": "当防守队员逼近时，你用脚内侧将球向后一磕，随即转身摆脱，这一动作通常被称为？",
-      "options": [
-        {
-          "key": "A",
-          "label": "马赛回旋",
-          "tags": []
-        },
-        {
-          "key": "B",
-          "label": "克鲁伊夫转身",
-          "tags": []
-        },
-        {
-          "key": "C",
-          "label": "牛尾巴过人",
-          "tags": []
-        },
-        {
-          "key": "D",
-          "label": "油炸丸子",
-          "tags": []
-        }
-      ],
-      "type": "radio",
-      "correctKey": "B"
-    },
-    {
-      "id": "K3",
       "text": "当对方边后卫在边线附近拿球时，我方压迫小组最有效的包夹策略是？",
       "options": [
         {
@@ -1533,12 +1293,17 @@
         },
         {
           "key": "B",
-          "label": "封死边路外线，迫使持球人向肋部（Half-space）转身，利用边线作为天然围墙进行合围",
-          "tags": []
+          "label": "封死边路外线，迫使持球人向肋部转身，利用边线作为天然围墙进行合围",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "correct"
+            }
+          ]
         },
         {
           "key": "C",
-          "label": "一人上前抢球，另一人留在中路保护（防守脱节）",
+          "label": "一人上前抢球，另一人留在中路保护",
           "tags": []
         },
         {
@@ -1551,8 +1316,8 @@
       "correctKey": "B"
     },
     {
-      "id": "K4",
-      "text": "阿尔特塔的阿森纳或瓜迪奥拉的曼城经常使用一名中后卫（通常是斯通斯或萨利巴）拉边，从而将防线变为临时的“2-3-5”进攻形态。这一战术动作的主要目的是？",
+      "id": "K3",
+      "text": "阿尔特塔的阿森纳或瓜迪奥拉的曼城经常使用一名中后卫拉边，从而将防线变为临时的\"2-3-5\"进攻形态。这一战术动作的主要目的是？",
       "options": [
         {
           "key": "A",
@@ -1561,8 +1326,13 @@
         },
         {
           "key": "B",
-          "label": "将对方边锋拉离中路，并利用后腰（CDM）填补防线空缺，从而制造局部人数优势",
-          "tags": []
+          "label": "将对方边锋拉离中路，并利用后腰填补防线空缺，从而制造局部人数优势",
+          "tags": [
+            {
+              "type": "meta",
+              "value": "correct"
+            }
+          ]
         },
         {
           "key": "C",
@@ -1579,8 +1349,8 @@
       "correctKey": "B"
     },
     {
-      "id": "K5",
-      "text": "在现代足球的“门将参与后场出球”体系中，门将不仅仅是防守者，更是“清道夫门将”（Sweeper-Keeper）。当对方前锋实施压迫时，门将最理想的出球路线通常是？",
+      "id": "K4",
+      "text": "在现代足球的\"门将参与后场出球\"体系中，当对方前锋实施压迫时，门将最理想的出球路线通常是？",
       "options": [
         {
           "key": "A",
@@ -1595,7 +1365,12 @@
         {
           "key": "C",
           "label": "斜长传转移至处于开阔地的边后卫/边翼卫，避开对方压迫密集区",
-          "tags": []
+          "tags": [
+            {
+              "type": "meta",
+              "value": "correct"
+            }
+          ]
         },
         {
           "key": "D",
