@@ -8,11 +8,39 @@ const RADAR_FAMILIES = {
   striker: { label: '前锋', color: '#ff8a65' },
 };
 
+const RADAR_FONT =
+  '"PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif';
+
+function setupRadarCanvas(canvas, cssSize = 360) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  canvas.width = Math.round(cssSize * dpr);
+  canvas.height = Math.round(cssSize * dpr);
+  canvas.style.width = `${cssSize}px`;
+  canvas.style.height = `${cssSize}px`;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  return { ctx, w: cssSize, h: cssSize };
+}
+
+function drawRadarLabel(ctx, text, x, y, fillStyle, font, stroke = true) {
+  ctx.font = font;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  if (stroke) {
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = 'rgba(6, 10, 18, 0.92)';
+    ctx.strokeText(text, x, y);
+  }
+  ctx.fillStyle = fillStyle;
+  ctx.fillText(text, x, y);
+}
+
 function drawRadarChart(canvas, radarData) {
   if (!canvas || !radarData?.length) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width;
-  const h = canvas.height;
+  const cssSize = Number(canvas.dataset.cssSize || canvas.getAttribute('width')) || 360;
+  const { ctx, w, h } = setupRadarCanvas(canvas, cssSize);
   const cx = w / 2;
   const cy = h / 2;
   const radius = Math.min(w, h) * 0.26;
@@ -142,33 +170,41 @@ function drawRadarChart(canvas, radarData) {
     ctx.fill();
   });
 
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
   radarData.forEach((d, i) => {
-    const labelR = radius + (d.active ? (i % 2 === 0 ? 34 : 42) : (i % 2 === 0 ? 50 : 58));
+    const labelR = radius + (d.active ? (i % 2 === 0 ? 36 : 44) : (i % 2 === 0 ? 52 : 60));
     const labelPoint = pointAt(i, labelR);
     const labelText = d.full_label || d.label;
 
     if (d.active) {
-      ctx.font = '600 10px sans-serif';
-      ctx.fillStyle = RADAR_FAMILIES[d.family]?.color || '#8b9bb8';
-      ctx.fillText(d.label, labelPoint.x, labelPoint.y);
-      const scorePoint = pointAt(i, radius + 18);
-      ctx.font = '700 9px sans-serif';
+      drawRadarLabel(
+        ctx,
+        d.label,
+        labelPoint.x,
+        labelPoint.y,
+        RADAR_FAMILIES[d.family]?.color || '#d8ecff',
+        `600 12px ${RADAR_FONT}`,
+      );
+      const scorePoint = pointAt(i, radius + 20);
       const score = d.value ?? 0;
-      ctx.fillStyle = score >= 7 ? '#00f5ff' : score <= 3.5 ? '#ff8a65' : '#e8edf7';
-      ctx.fillText(score.toFixed(1), scorePoint.x, scorePoint.y);
+      drawRadarLabel(
+        ctx,
+        score.toFixed(1),
+        scorePoint.x,
+        scorePoint.y,
+        score >= 7 ? '#7ff7ff' : score <= 3.5 ? '#ffb199' : '#f3f7ff',
+        `700 11px ${RADAR_FONT}`,
+      );
       return;
     }
 
-    ctx.font = '500 8px sans-serif';
-    ctx.fillStyle = 'rgba(139, 155, 184, 0.78)';
+    const inactiveColor = 'rgba(228, 236, 248, 0.94)';
+    const inactiveFont = `500 10.5px ${RADAR_FONT}`;
     if (labelText.length > 5) {
       const mid = Math.ceil(labelText.length / 2);
-      ctx.fillText(labelText.slice(0, mid), labelPoint.x, labelPoint.y - 5);
-      ctx.fillText(labelText.slice(mid), labelPoint.x, labelPoint.y + 5);
+      drawRadarLabel(ctx, labelText.slice(0, mid), labelPoint.x, labelPoint.y - 6, inactiveColor, inactiveFont);
+      drawRadarLabel(ctx, labelText.slice(mid), labelPoint.x, labelPoint.y + 6, inactiveColor, inactiveFont);
     } else {
-      ctx.fillText(labelText, labelPoint.x, labelPoint.y);
+      drawRadarLabel(ctx, labelText, labelPoint.x, labelPoint.y, inactiveColor, inactiveFont);
     }
   });
 

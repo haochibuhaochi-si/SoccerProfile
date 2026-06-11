@@ -3,26 +3,97 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <meta name="theme-color" content="#0a0e17" />
-  <title>足球风格与竞技水准测试</title>
-  <link rel="stylesheet" href="./css/styles.css?v=2025060705" />
+  <meta name="theme-color" content="#090d16" />
+  <meta name="description" content="绿茵矩阵数字球探评估：10题趣味球迷版或35题硬核专业版，匹配24大战术原型、12维风格星图与可分享球星卡报告。" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="草根球星评测 · 数字球探系统" />
+  <meta property="og:description" content="10题快测球风 ¥0.99，或35题硬核深拆战力 ¥5.9。解锁专属球星卡与草根球员球探报告。" />
+  <meta property="og:image" content="./assets/scout-cards/F3_B2B.png" />
+  <title>草根球星评测· 数字球探系统</title>
+  <link rel="stylesheet" href="./css/styles.css?v=2025061211" />
 </head>
 <body>
   <div id="app">
     <!-- Step 1: Welcome -->
     <section id="step-welcome" class="step active">
-      <div class="welcome-hero">
-        <div class="logo-mark">⚽</div>
-        <h1>足球 DNA</h1>
-        <p class="slogan">36 道题，读懂你的球风、强度与战术素养</p>
-        <ul class="feature-list">
-          <li>24 种 Archetype 原型匹配</li>
-          <li>PlayLevel 竞技强度评分</li>
-          <li>个性化训练与风格参照</li>
-        </ul>
+      <div class="welcome-shell">
+        <header class="welcome-brand">
+          <div class="welcome-logo" aria-hidden="true">⚽</div>
+          <h1 class="welcome-title">草根球星评测</h1>
+          <p class="welcome-label welcome-eyebrow">2026足球盛宴 · 业余玩家数字球探系统</p>
+          <p class="welcome-lead">双档测评矩阵：球迷版 10 题轻测球风，专业版 35 题深拆战力与球商基因。</p>
+        </header>
+
+        <section class="welcome-block" aria-label="解锁内容">
+          <p class="welcome-label welcome-block-label">解锁内容</p>
+          <div class="welcome-preview-frame">
+            <div class="welcome-preview-glass">
+              <div class="welcome-preview-scan" aria-hidden="true"></div>
+              <div class="welcome-preview-overlay">
+                <p class="welcome-preview-headline">专属战术原型球星卡</p>
+                <p class="welcome-preview-headline accent">最专业的草根球员球探报告</p>
+                <p class="welcome-muted welcome-preview-tags">风格星图 · 核心解析 · 球探五维 · 训练建议</p>
+              </div>
+            </div>
+            <img
+              class="welcome-preview-card"
+              src="./assets/scout-cards/F3_B2B.png"
+              alt=""
+              loading="eager"
+            />
+          </div>
+        </section>
+
+        <section class="welcome-block">
+          <p class="welcome-label welcome-block-label">核心能力</p>
+          <ul class="welcome-value-cards">
+            <li class="welcome-value-card">
+              <span class="welcome-value-icon" aria-hidden="true">🎴</span>
+              <div>
+                <h3 class="welcome-card-title">24 大战术原型匹配</h3>
+                <p class="welcome-muted">赛场行为沙盘精算，锁定踢球底色与风格归属。</p>
+              </div>
+            </li>
+            <li class="welcome-value-card">
+              <span class="welcome-value-icon" aria-hidden="true">🛰️</span>
+              <div>
+                <h3 class="welcome-card-title">12 维星图 + 球探五维</h3>
+                <p class="welcome-muted">可视化行为偏好与竞技强度，看懂野球圈档位。</p>
+              </div>
+            </li>
+            <li class="welcome-value-card">
+              <span class="welcome-value-icon" aria-hidden="true">♟️</span>
+              <div>
+                <h3 class="welcome-card-title">战术素养深拆</h3>
+                <p class="welcome-muted">决策沙盘 + 优缺点解析与训练建议，砍掉认知盲区。</p>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <div class="welcome-cta-block">
+          <p class="welcome-label welcome-block-label welcome-block-label--center">选择档位 · 点击开始</p>
+          <div class="welcome-pricing" aria-label="测评档位与价格">
+            <button type="button" class="welcome-pricing-tier welcome-pricing-tier--lite" id="btn-start-lite">
+              <span class="welcome-label welcome-pricing-tag">球迷版</span>
+              <span class="welcome-card-title">10 题趣味快测</span>
+              <span class="welcome-pricing-price">¥0.99</span>
+              <span class="welcome-muted">基础球星卡 + 球风摘要</span>
+            </button>
+            <button type="button" class="welcome-pricing-tier welcome-pricing-tier--pro" id="btn-start-pro">
+              <span class="welcome-pricing-badge" aria-hidden="true">PRO</span>
+              <span class="welcome-label welcome-pricing-tag">专业版</span>
+              <span class="welcome-card-title">35 题硬核深拆</span>
+              <span class="welcome-pricing-price">¥5.9</span>
+              <span class="welcome-muted">完整雷达 + 深度报告全解锁</span>
+            </button>
+          </div>
+          <div class="welcome-notes">
+            <p class="welcome-muted welcome-micro">专业版限懂球老哥挑战，云玩家请绕道 💀</p>
+            <p class="welcome-footnote">安静环境手机作答 · 草根球员球探报告 · 支持分享球星卡</p>
+          </div>
+        </div>
       </div>
-      <button type="button" class="btn btn-primary" id="btn-start">开始测试</button>
-      <p class="footnote">约 8–12 分钟 · 移动端优先</p>
     </section>
 
     <!-- Step 2: Quiz -->
@@ -31,11 +102,14 @@
         <div class="progress-wrap">
           <div class="progress-bar" id="progress-bar"></div>
         </div>
-        <span class="progress-text" id="progress-text">1 / 46</span>
+        <span class="progress-text" id="progress-text">1 / 36</span>
       </header>
       <div class="quiz-body">
         <span class="part-badge" id="part-badge">基本信息</span>
-        <h2 class="question-title" id="question-title"></h2>
+        <div class="question-stage">
+          <span class="question-watermark" id="question-watermark" aria-hidden="true">01</span>
+          <h2 class="question-title" id="question-title"></h2>
+        </div>
         <p class="question-hint" id="question-hint"></p>
         <div class="options" id="options"></div>
       </div>
@@ -74,11 +148,10 @@
         <h2>解锁完整报告</h2>
         <p>含雷达图、深度解析、强度分析、训练建议与风格参照系</p>
         <div class="price-row">
-          <span class="price">¥9.9</span>
+          <span class="price" id="paywall-price">¥5.9</span>
           <span class="price-note">一次解锁 · 永久查看</span>
         </div>
         <button type="button" class="btn btn-primary" id="btn-unlock">解锁我的报告</button>
-        <button type="button" class="btn btn-ghost" id="btn-ad-unlock">观看广告免费解锁（演示）</button>
       </div>
     </section>
 
@@ -86,30 +159,43 @@
     <section id="step-report" class="step">
       <div class="report-hero">
         <article class="player-card" id="player-card">
-          <div class="card-noise"></div>
-          <div class="card-topline">
-            <span id="card-archetype-id">ARCHETYPE</span>
-            <strong id="card-rating">00</strong>
-          </div>
-          <div class="card-title">
-            <p>YOUR SCOUT CARD</p>
-            <h2 id="card-title">球员剪影生成中</h2>
-          </div>
-          <div class="silhouette-stage" id="silhouette-stage">
-            <canvas id="card-radar" width="140" height="140"></canvas>
-            <div id="player-silhouette" class="player-silhouette" aria-hidden="true"></div>
-          </div>
-          <div class="card-stat-row">
-            <div>
-              <span>PlayLevel</span>
-              <strong id="card-playlevel">0.00</strong>
+          <div class="fut-card-shell">
+            <div class="card-art-bg" aria-hidden="true">
+              <img id="player-illustration" class="player-illustration hidden" alt="" />
             </div>
-            <div>
-              <span>Style Match</span>
-              <strong id="card-match">0%</strong>
+            <div id="card-art-fallback" class="card-art-fallback hidden" aria-hidden="true">
+              <span class="card-art-code" id="card-art-code">F3</span>
+              <strong class="card-art-word" id="card-art-word">ELITE</strong>
+            </div>
+            <div class="card-fx" aria-hidden="true">
+              <div class="card-foil"></div>
+              <div class="card-glare"></div>
+            </div>
+            <div class="card-overlay">
+              <header class="fut-head">
+                <div class="fut-rating-col">
+                  <strong id="card-rating">00</strong>
+                  <span id="card-archetype-id">ARCHETYPE</span>
+                </div>
+                <div class="fut-name-col">
+                  <p class="fut-kicker" id="card-kicker">ELITE</p>
+                  <h2 id="card-title">球员卡生成中</h2>
+                </div>
+              </header>
+              <footer class="fut-foot">
+                <div class="fut-stat">
+                  <span>PlayLevel</span>
+                  <strong id="card-playlevel">0.00</strong>
+                </div>
+                <div class="fut-stat">
+                  <span>Style Match</span>
+                  <strong id="card-match">0%</strong>
+                </div>
+              </footer>
             </div>
           </div>
-          <p class="card-tagline" id="card-tagline"></p>
+          <p class="card-tagline card-tagline-below" id="card-tagline"></p>
+          <canvas id="card-radar" class="visually-hidden" width="140" height="140" aria-hidden="true"></canvas>
         </article>
         <button type="button" class="btn btn-primary" id="btn-view-report">查看完整球探报告</button>
       </div>
@@ -131,10 +217,11 @@
 
       <section class="report-block">
         <h3>风格星图</h3>
+        <p class="report-block-lead">风格 DNA · 12 维行为偏好全景（来自 Part1 场景题，反映「你怎么踢」）</p>
         <div class="radar-shell">
-          <canvas id="radar-canvas" width="360" height="360"></canvas>
+          <canvas id="radar-canvas" width="360" height="360" data-css-size="400"></canvas>
           <div class="radar-legend" id="radar-legend"></div>
-          <div class="radar-caption">12 维全景 · 亮色为你的主踢位置族 · 灰色为其他位置参考维度</div>
+          <div class="radar-caption">亮色 = 你的主踢位置族 · 灰色 = 其他位置参考维度</div>
         </div>
       </section>
 
@@ -160,6 +247,8 @@
 
       <section class="report-block scout-block">
         <h3>球探五维</h3>
+        <p class="report-block-lead">竞技画像 · 综合环境、执行、素养与风格的模型评分（非单一能力测验）</p>
+        <p class="report-literacy-note" id="report-literacy-note"></p>
         <p class="scout-summary" id="report-scout-summary"></p>
         <div class="scout-grid" id="report-scout-grid"></div>
       </section>
@@ -172,41 +261,100 @@
       <section class="report-block">
         <h3>训练建议</h3>
         <ol id="report-training"></ol>
+        <p class="training-highlight hidden" id="report-training-highlight"></p>
         <p class="formation-fit" id="report-formation"></p>
       </section>
 
       <section class="report-block style-ref-block">
         <h3>风格参照系</h3>
+        <p class="report-block-lead">职业球员仅作风格类比，帮你把抽象数据翻译成可感知的踢球画面</p>
         <p class="disclaimer" id="report-disclaimer"></p>
+        <p class="ref-spirit-line" id="report-ref-spirit"></p>
         <div class="reference-grid">
           <article class="reference-card core">
             <span>核心原型</span>
             <p id="report-core-ref"></p>
+            <p class="ref-scene" id="report-core-scene"></p>
           </article>
           <article class="reference-card sub">
             <span>次级基因</span>
             <p id="report-sub-ref"></p>
+            <p class="ref-scene" id="report-sub-scene"></p>
           </article>
           <article class="reference-card avoid">
             <span>非当前赛道</span>
             <p id="report-avoid-ref"></p>
+            <p class="ref-scene ref-scene--muted" id="report-avoid-why"></p>
           </article>
         </div>
+        <p class="ref-watch-tip" id="report-watch-tip"></p>
+        <p class="ref-grassroots" id="report-grassroots-note"></p>
         <p class="hybrid-ref" id="report-hybrid-ref"></p>
       </section>
 
       <footer class="report-footer">
         <button type="button" class="btn btn-primary" id="btn-share">分享报告</button>
-        <button type="button" class="btn btn-ghost" id="btn-restart">重新测试</button>
+        <button type="button" class="btn btn-ghost" id="btn-restart">我要测试</button>
       </footer>
       </div>
     </section>
   </div>
 
+  <div id="share-sheet" class="share-sheet" aria-hidden="true">
+    <div class="share-sheet-panel share-sheet-panel--card-only" role="dialog" aria-label="球星卡报告预览">
+      <button type="button" class="share-sheet-close" id="share-close" aria-label="关闭">×</button>
+      <article class="player-card share-player-card" id="share-player-card">
+        <div class="fut-card-shell">
+          <div class="card-art-bg" aria-hidden="true">
+            <img id="share-player-illustration" class="player-illustration hidden" alt="" />
+          </div>
+          <div id="share-card-art-fallback" class="card-art-fallback hidden" aria-hidden="true">
+            <span class="card-art-code" id="share-card-art-code">F3</span>
+            <strong class="card-art-word" id="share-card-art-word">ELITE</strong>
+          </div>
+          <div class="card-fx" aria-hidden="true">
+            <div class="card-foil"></div>
+            <div class="card-glare"></div>
+          </div>
+          <div class="card-overlay">
+            <header class="fut-head">
+              <div class="fut-rating-col">
+                <strong id="share-card-rating">00</strong>
+                <span id="share-card-archetype-id">ARCHETYPE</span>
+              </div>
+              <div class="fut-name-col">
+                <p class="fut-kicker" id="share-card-kicker">ELITE</p>
+                <h2 id="share-card-title">球员卡</h2>
+              </div>
+            </header>
+            <footer class="fut-foot">
+              <div class="fut-stat">
+                <span>PlayLevel</span>
+                <strong id="share-card-playlevel">0.00</strong>
+              </div>
+              <div class="fut-stat">
+                <span>Style Match</span>
+                <strong id="share-card-match">0%</strong>
+              </div>
+            </footer>
+          </div>
+        </div>
+        <p class="card-tagline card-tagline-below" id="share-card-tagline"></p>
+      </article>
+      <div class="share-export-actions">
+        <button type="button" class="btn btn-primary" id="share-to-friend">分享给好友</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 微信内优先本地 SDK，避免外网 CDN 加载失败 -->
   <script src="./js/cloudbase.full.js"></script>
-  <script src="./js/radar.js?v=2025060705"></script>
-  <script src="./js/api.js?v=2025060705"></script>
-  <script src="./js/app.js?v=2025060705"></script>
+  <script src="./js/radar.js?v=2025061029"></script>
+  <script src="./js/api.js?v=2025061106"></script>
+  <script src="./js/confetti.js?v=2025061029"></script>
+  <script src="./js/html2canvas.min.js?v=1.4.1"></script>
+  <script src="./js/card-capture.js?v=2025061112"></script>
+  <script src="./js/share.js?v=2025061111"></script>
+  <script src="./js/app.js?v=2025061211"></script>
 </body>
 </html>

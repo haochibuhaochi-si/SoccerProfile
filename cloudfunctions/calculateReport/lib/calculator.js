@@ -154,7 +154,46 @@ const COACHABILITY_MOD = {
   'Coachability Slow': -0.06,
   'Coachability Low': -0.16,
 };
-const LITERACY_BONUS = { 4: 0.6, 3: 0.4, 2: 0.2, 1: 0.1 };
+const LITERACY_BONUS = { 5: 0.75, 4: 0.6, 3: 0.45, 2: 0.3, 1: 0.15, 0: 0 };
+/** 球探五维「战术理解」：K 题每题 +0.6（5 题满 +3.0），与 PlayLevel 素养加成比例约 4:1 */
+const TACTICAL_BASE = 4.0;
+const TACTICAL_LIT_WEIGHT = 0.6;
+const TACTICAL_DISCIPLINE_WEIGHT = 4.5;
+const TACTICAL_STYLE_AXIS_WEIGHT = 0.35;
+const TACTICAL_ELITE_FLOOR = 6.5;
+/** 球探五维「身体与执行」：以 5 为中性锚，减轻 exec/age 惩罚避免系统性偏低 */
+const PHYSICAL_BASE = 5.6;
+const PHYSICAL_STYLE_DEV_WEIGHT = 0.8;
+const PHYSICAL_EXEC_WEIGHT = 1.0;
+const PHYSICAL_AGE_WEIGHT = 1.6;
+const FAMILY_AXES = {
+  defender: ['F2-Engagement', 'F2-Distribution', 'F2-Body'],
+  midfielder: ['F3-Tempo', 'F3-Duels', 'F3-Territory'],
+  wing: ['F4-Mode', 'F4-WorkRate', 'F4-Width'],
+  striker: ['F5-HoldUp', 'F5-Movement', 'F5-Physical'],
+};
+const INACTIVE_AXIS_WEIGHT = 0.35;
+const ACTIVE_AXIS_WEIGHT = 2.5;
+const DUAL_POSITION_AXIS_WEIGHT = 2.2;
+const MAX_SELF_MOD_BY_ENV = {
+  A: 0.22,
+  'B+': 0.14,
+  B: 0.08,
+  C: 0.04,
+  D: 0,
+};
+const MAX_BASE_BY_SELF = {
+  A: 8,
+  B: 7,
+  C: 6,
+  D: 4.8,
+  E: 3.8,
+};
+const PLAYLEVEL_SOFT_CAP = {
+  elite: 9.4,
+  high: 8.9,
+  standard: 8.4,
+};
 const STYLE_EXEC_AXES = ['F3-Duels', 'F4-WorkRate', 'F2-Engagement', 'F2-Body', 'F5-Physical'];
 
 function clamp(n, min, max) {
@@ -235,6 +274,65 @@ function cosineSimilarity(a, b) {
   return dot / (Math.sqrt(normA) * Math.sqrt(normB));
 }
 
+function buildAxisWeights(q0Keys) {
+  const positions = q0Keys?.length ? q0Keys : ['midfielder'];
+  const weight = positions.length > 1 ? DUAL_POSITION_AXIS_WEIGHT : ACTIVE_AXIS_WEIGHT;
+  const weights = Object.fromEntries(AXES.map((axis) => [axis, INACTIVE_AXIS_WEIGHT]));
+  positions.forEach((pos) => {
+    (FAMILY_AXES[pos] || []).forEach((axis) => {
+      weights[axis] = weight;
+    });
+  });
+  return weights;
+}
+
+function weightedCosineSimilarity(a, b, weights) {
+  let dot = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < a.length; i++) {
+    const w = weights[i];
+    const ua = a[i] * w;
+    const ub = b[i] * w;
+    dot += ua * ub;
+    normA += ua * ua;
+    normB += ub * ub;
+  }
+  if (normA === 0 || normB === 0) return 0;
+  return dot / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
+function getEnvTierFromOpt(opt) {
+  const tierTag = (opt?.tags || []).find((t) => t.type === 'env_tier');
+  return tierTag?.value || 'B';
+}
+
+function getSelfTierFromOpt(opt) {
+  const tag = (opt?.tags || []).find(
+    (t) => t.type === 'meta' && String(t.value).startsWith('Self Tier'),
+  );
+  return tag?.value?.replace('Self Tier ', '') || 'C';
+}
+
+function applyPlayLevelCaps(base, selfMod, envTier, selfTier) {
+  const cappedBase = Math.min(base, MAX_BASE_BY_SELF[selfTier] ?? 6);
+  let cappedSelfMod = selfMod;
+  if (selfMod > 0) {
+    cappedSelfMod = Math.min(selfMod, MAX_SELF_MOD_BY_ENV[envTier] ?? 0.08);
+  }
+  return { cappedBase, cappedSelfMod };
+}
+
+function applyPlayLevelSoftCap(score, envTier, selfTier) {
+  if (envTier === 'A' && (selfTier === 'A' || selfTier === 'B')) {
+    return Math.min(score, PLAYLEVEL_SOFT_CAP.elite);
+  }
+  if (envTier === 'A' || envTier === 'B+') {
+    return Math.min(score, PLAYLEVEL_SOFT_CAP.high);
+  }
+  return Math.min(score, PLAYLEVEL_SOFT_CAP.standard);
+}
+
 function getCandidatePool(q0Keys, prototypes) {
   const pools = prototypes.position_pools;
   const ids = new Set();
@@ -249,12 +347,14 @@ function getCandidatePool(q0Keys, prototypes) {
 
 function matchArchetypes(userVec, q0Keys, prototypes) {
   const userArr = vectorToArray(userVec);
+  const axisWeights = buildAxisWeights(q0Keys);
+  const weightArr = AXES.map((axis) => axisWeights[axis]);
   const allIds = Object.keys(prototypes.prototypes);
 
   const ranked = allIds
     .map((id) => {
       const proto = prototypes.prototypes[id];
-      const similarity = cosineSimilarity(userArr, proto);
+      const similarity = weightedCosineSimilarity(userArr, proto, weightArr);
       return { id, similarity };
     })
     .sort((a, b) => b.similarity - a.similarity);
@@ -295,6 +395,9 @@ function computePlayLevel(intensityQuestions, intensityAnswers, literacyCorrect,
   };
 
   const s1Opt = getOpt(0);
+  const s10Opt = getOpt(9);
+  const envTier = getEnvTierFromOpt(s1Opt);
+  const selfTier = getSelfTierFromOpt(s10Opt);
   const tierTag = (s1Opt?.tags || []).find((t) => t.type === 'env_tier');
   if (tierTag) base = ENV_BASE[tierTag.value] ?? 5.0;
 
@@ -303,7 +406,10 @@ function computePlayLevel(intensityQuestions, intensityAnswers, literacyCorrect,
   const reliabilityMod = getMetaModifier(getOpt(4), RELIABILITY_MOD);
   const pitchMod = getMetaModifier(getOpt(7), PITCH_MOD);
   const ageMod = getMetaModifier(getOpt(8), AGE_MOD);
-  const selfMod = getMetaModifier(getOpt(9), SELF_MOD);
+  const selfModRaw = getMetaModifier(getOpt(9), SELF_MOD);
+  const { cappedBase, cappedSelfMod } = applyPlayLevelCaps(base, selfModRaw, envTier, selfTier);
+  base = cappedBase;
+  const selfMod = cappedSelfMod;
   const availabilityMod = getMetaModifier(getOpt(3), AVAILABILITY_MOD);
   const disciplineMod = getMetaModifier(getOpt(4), DISCIPLINE_MOD);
   const mentalityMod = getMetaModifier(getOpt(5), MENTALITY_MOD);
@@ -337,11 +443,15 @@ function computePlayLevel(intensityQuestions, intensityAnswers, literacyCorrect,
     mentalityMod +
     disciplineMod +
     coachabilityMod;
-  const score = clamp(rawScore, 1, 10);
+  let score = clamp(rawScore, 1, 10);
+  score = applyPlayLevelSoftCap(score, envTier, selfTier);
 
   return {
     playlevel_score: Math.round(score * 100) / 100,
     base,
+    envTier,
+    selfTier,
+    selfModRaw,
     freqMod,
     peerMod,
     execMod,
@@ -369,8 +479,8 @@ function mapIntensityBand(score) {
 }
 
 function mapLiteracyBand(correctCount) {
-  if (correctCount >= 4) return 'LIT_ELITE';
-  if (correctCount >= 3) return 'LIT_HIGH';
+  if (correctCount >= 5) return 'LIT_ELITE';
+  if (correctCount >= 4) return 'LIT_HIGH';
   if (correctCount >= 2) return 'LIT_MID';
   return 'LIT_LOW';
 }
@@ -529,11 +639,13 @@ function buildMatchScript(vector, match, play, literacyBand) {
     transition: `攻守转换里，「${AXIS_META[space.axis].label}」决定你更像推进器、连接点还是终结点。${axisTone(space.axis, space.value)}。`,
     pressure: pressureText,
     game_context:
-      literacyBand === 'LIT_HIGH'
-        ? '你适合被赋予更复杂的战术任务，例如压迫触发点、弱侧转移或肋部轮转。'
-        : literacyBand === 'LIT_MID'
-          ? '你能理解多数战术安排，但最好把任务拆成清晰的两三个触发条件。'
-          : '你更适合明确、直接的场上指令，先把站位和第一选择稳定下来。',
+      literacyBand === 'LIT_ELITE'
+        ? '你适合承担更复杂的战术角色：触发边线陷阱、运用第三人原则破压、在密集防守中寻找肋部渗透，并在丢球后第一时间延缓反击。'
+        : literacyBand === 'LIT_HIGH'
+          ? '你能读懂压迫路线、后场轮转、肋部跑位和丢球延缓的大方向，适合在体系里承担明确的战术触发任务。'
+          : literacyBand === 'LIT_MID'
+            ? '你具备基础战术概念，但复杂轮转下最好把任务拆成清晰的两三个触发条件。'
+            : '你更适合明确、直接的场上指令，先把站位、第一选择和丢球后的回防节奏稳定下来。',
   };
 }
 
@@ -575,16 +687,20 @@ function buildScoutProfile(vector, play, literacyCorrect) {
       play.weakFootMod * 4,
   );
   const physical = normalizeScore(
-    averageAxes(vector, ['F2-Body', 'F3-Duels', 'F4-WorkRate', 'F5-Physical']) +
-      play.execMod * 1.6 +
-      play.ageMod * 3,
+    PHYSICAL_BASE +
+      (averageAxes(vector, ['F2-Body', 'F3-Duels', 'F4-WorkRate', 'F5-Physical']) - 5) *
+        PHYSICAL_STYLE_DEV_WEIGHT +
+      play.execMod * PHYSICAL_EXEC_WEIGHT +
+      play.ageMod * PHYSICAL_AGE_WEIGHT,
   );
-  const tactical = normalizeScore(
-    4.4 +
-      literacyCorrect * 1.1 +
-      play.disciplineMod * 5 +
-      (averageAxes(vector, ['F2-Distribution', 'F3-Tempo', 'F3-Territory', 'F4-Width']) - 5) * 0.25,
-  );
+  let tacticalRaw =
+    TACTICAL_BASE +
+    literacyCorrect * TACTICAL_LIT_WEIGHT +
+    play.disciplineMod * TACTICAL_DISCIPLINE_WEIGHT +
+    (averageAxes(vector, ['F2-Distribution', 'F3-Tempo', 'F3-Territory', 'F4-Width']) - 5) *
+      TACTICAL_STYLE_AXIS_WEIGHT;
+  if (literacyCorrect >= 5) tacticalRaw = Math.max(tacticalRaw, TACTICAL_ELITE_FLOOR);
+  const tactical = normalizeScore(tacticalRaw);
   const mentality = normalizeScore(
     5 +
       play.mentalityMod * 6 +
@@ -615,7 +731,7 @@ function buildScoutProfile(vector, play, literacyCorrect) {
       key: 'tactical',
       label: '战术理解',
       score: tactical,
-      desc: '结合战术素养答题、纪律性和空间/节奏相关风格轴。',
+      desc: '结合压迫陷阱、第三人破压、肋部渗透、丢球延缓等素养题表现，以及纪律性和空间/节奏相关风格轴。',
     },
     {
       key: 'mentality',
@@ -649,6 +765,45 @@ function buildDeepReport(vector, match, play, literacyBand, literacyCorrect, q0K
   };
 }
 
+function assembleTraining(copyPack, baseTraining, intensityBand, literacyBand) {
+  const layers = copyPack.training_layers;
+  const priority1 = baseTraining?.priority_1 || '';
+  const priority2 = baseTraining?.priority_2 || '';
+
+  if (!layers) {
+    return {
+      priority_1: priority1,
+      priority_2: priority2,
+      items: [
+        { tag: '风格专项', text: priority1 },
+        { tag: '风格专项', text: priority2 },
+      ].filter((item) => item.text),
+      highlight: null,
+    };
+  }
+
+  const intensity = layers.intensity?.[intensityBand] || {};
+  const literacy = layers.literacy?.[literacyBand] || {};
+  const items = [
+    { tag: '风格专项', text: priority1 },
+    { tag: '风格专项', text: priority2 },
+    intensity.focus ? { tag: intensity.label || '强度适配', text: intensity.focus } : null,
+    literacy.focus ? { tag: literacy.label || '素养提升', text: literacy.focus } : null,
+  ].filter((item) => item && item.text);
+
+  const fusionKey = `${intensityBand}|${literacyBand}`;
+  const highlight = layers.fusion?.[fusionKey]?.highlight || null;
+
+  return {
+    priority_1: priority1,
+    priority_2: priority2,
+    items,
+    highlight,
+    intensity_layer: intensity.focus ? intensity : null,
+    literacy_layer: literacy.focus ? literacy : null,
+  };
+}
+
 function assembleCopy(copyPack, archetypeId, secondaryId, isHybrid, intensityBand, literacyBand) {
   const arch = copyPack.archetypes[archetypeId];
   if (!arch) return null;
@@ -679,7 +834,7 @@ function assembleCopy(copyPack, archetypeId, secondaryId, isHybrid, intensityBan
     description: base.description,
     strengths: base.strengths,
     weaknesses: base.weaknesses,
-    training: base.training,
+    training: assembleTraining(copyPack, base.training, intensityBand, literacyBand),
     formation_fit: base.formation_fit,
     style_reference: base.style_reference,
     hybrid_desc: hybridDesc,

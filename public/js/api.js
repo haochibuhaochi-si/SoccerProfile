@@ -64,4 +64,31 @@ async function submitAnswers(payload) {
   return body.data;
 }
 
-window.SoccerAPI = { submitAnswers, CLOUD_ENV_ID };
+async function uploadShareImage(blob, archetypeId) {
+  const app = await getApp();
+  const auth = app.auth();
+  const loginState = await auth.getLoginState().catch(() => null);
+  if (!loginState) {
+    await auth.signInAnonymously();
+  }
+
+  const cloudPath = `share-posters/${archetypeId}-${Date.now()}.png`;
+  const file =
+    blob instanceof File
+      ? blob
+      : new File([blob], `${archetypeId}-share.png`, { type: 'image/png' });
+  const uploadRes = await app.uploadFile({
+    cloudPath,
+    filePath: file,
+  });
+
+  const fileId = uploadRes?.fileID || uploadRes?.fileId;
+  if (!fileId) throw new Error('图片上传失败');
+
+  const urlRes = await app.getTempFileURL({ fileList: [fileId] });
+  const file = urlRes?.fileList?.[0];
+  if (!file?.tempFileURL) throw new Error('获取分享图链接失败');
+  return file.tempFileURL;
+}
+
+window.SoccerAPI = { submitAnswers, CLOUD_ENV_ID, getApp, uploadShareImage };

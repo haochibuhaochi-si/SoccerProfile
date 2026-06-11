@@ -3,53 +3,155 @@
  */
 const STORAGE_KEY = 'soccer_profile_answers';
 const REPORT_KEY = 'soccer_profile_report';
+const MODE_KEY = 'soccer_profile_mode';
+const LITE_STYLE_COUNT = 9;
+const PAYWALL_PRICES = { lite: 0.99, pro: 5.9 };
 
 let questions = null;
 let quizItems = [];
+let quizMode = 'pro';
 let currentIndex = 0;
 let answers = {
   q0: [],
-  style: [],
-  intensity: [],
-  literacy: [],
+  map: {},
 };
 let reportData = null;
+let isSharedView = false;
 let silhouetteVariant = null;
 let reportExpanded = false;
+let quizAdvanceTimer = null;
+let isAdvancingQuiz = false;
 
 const LOADING_MSGS = [
   '正在读取你的比赛 DNA...',
   '正在匹配主 Archetype 与副型基因...',
   '正在计算 PlayLevel 与球探五维...',
-  '正在渲染风格星图与球员剪影...',
+  '正在渲染风格星图与球星卡主视觉...',
   '正在生成一份全面球探报告...',
 ];
 
+const CARD_THEME_PRESETS = {
+  legendGold: {
+    accent: '#f7cf67',
+    accent2: '#ff8d4d',
+    foilA: '#fff0b5',
+    foilB: '#ffb35c',
+    glow: 'rgba(247, 207, 103, 0.55)',
+    panel: 'rgba(10, 12, 20, 0.74)',
+  },
+  royalIce: {
+    accent: '#7ae4ff',
+    accent2: '#8caeff',
+    foilA: '#e8fbff',
+    foilB: '#7ad5ff',
+    glow: 'rgba(122, 228, 255, 0.5)',
+    panel: 'rgba(8, 14, 28, 0.74)',
+  },
+  infernoRed: {
+    accent: '#ff6678',
+    accent2: '#ffb347',
+    foilA: '#ffd6dd',
+    foilB: '#ff8757',
+    glow: 'rgba(255, 102, 120, 0.52)',
+    panel: 'rgba(20, 8, 14, 0.74)',
+  },
+  emeraldStrike: {
+    accent: '#63e6be',
+    accent2: '#b4ff61',
+    foilA: '#dbfff3',
+    foilB: '#89f06a',
+    glow: 'rgba(99, 230, 190, 0.5)',
+    panel: 'rgba(8, 18, 15, 0.74)',
+  },
+  holoPurple: {
+    accent: '#c7a4ff',
+    accent2: '#ff8be8',
+    foilA: '#f3e6ff',
+    foilB: '#b695ff',
+    glow: 'rgba(199, 164, 255, 0.5)',
+    panel: 'rgba(14, 10, 24, 0.74)',
+  },
+  obsidianChrome: {
+    accent: '#d9dde8',
+    accent2: '#6fb7ff',
+    foilA: '#ffffff',
+    foilB: '#bcc7d8',
+    glow: 'rgba(217, 221, 232, 0.42)',
+    panel: 'rgba(7, 9, 16, 0.8)',
+  },
+};
+
 const ARCHETYPE_CARD_PROFILES = {
-  F2_A: { family: 'defender', accent: '#00d4ff', pose: 'anchor' },
-  F2_BS: { family: 'defender', accent: '#2dd4bf', pose: 'ballplayer' },
-  F2_AG: { family: 'defender', accent: '#ff6b35', pose: 'tackler' },
-  F2_FB: { family: 'defender', accent: '#38bdf8', pose: 'anchor' },
-  F2_SW: { family: 'defender', accent: '#93c5fd', pose: 'ballplayer' },
-  F3_RO: { family: 'midfielder', accent: '#a78bfa', pose: 'regista' },
-  F3_DE: { family: 'midfielder', accent: '#38a169', pose: 'destroyer' },
-  F3_B2B: { family: 'midfielder', accent: '#ffcf5a', pose: 'runner' },
-  F3_AM: { family: 'midfielder', accent: '#f472b6', pose: 'creator' },
-  F3_CTR: { family: 'midfielder', accent: '#818cf8', pose: 'regista' },
-  F3_CAR: { family: 'midfielder', accent: '#34d399', pose: 'runner' },
-  F3_HB: { family: 'midfielder', accent: '#60a5fa', pose: 'destroyer' },
-  F3_SS: { family: 'midfielder', accent: '#fb7185', pose: 'creator' },
-  F4_CR: { family: 'wing', accent: '#60a5fa', pose: 'crosser' },
-  F4_IN: { family: 'wing', accent: '#fb7185', pose: 'inverter' },
-  F4_WB: { family: 'wing', accent: '#22c55e', pose: 'wingback' },
-  F4_WP: { family: 'wing', accent: '#38bdf8', pose: 'crosser' },
-  F4_SP: { family: 'wing', accent: '#f97316', pose: 'raider' },
-  F5_PO: { family: 'striker', accent: '#f97316', pose: 'poacher' },
-  F5_TG: { family: 'striker', accent: '#eab308', pose: 'target' },
-  F5_RF: { family: 'striker', accent: '#ef4444', pose: 'raider' },
-  F5_PF: { family: 'striker', accent: '#22c55e', pose: 'destroyer' },
-  F5_AF: { family: 'striker', accent: '#fb923c', pose: 'raider' },
-  F5_CF: { family: 'striker', accent: '#facc15', pose: 'target' },
+  F2_A: { family: 'defender', theme: 'royalIce', artCode: 'F2', artWord: 'ANCHOR' },
+  F2_BS: { family: 'defender', theme: 'emeraldStrike', artCode: 'F2', artWord: 'BALLPLAY' },
+  F2_AG: { family: 'defender', theme: 'infernoRed', artCode: 'F2', artWord: 'PRESS' },
+  F2_FB: { family: 'defender', theme: 'royalIce', artCode: 'F2', artWord: 'LOCKDOWN' },
+  F2_SW: { family: 'defender', theme: 'obsidianChrome', artCode: 'F2', artWord: 'SWEEPER' },
+  F3_RO: { family: 'midfielder', theme: 'holoPurple', artCode: 'F3', artWord: 'REGISTA' },
+  F3_DE: { family: 'midfielder', theme: 'emeraldStrike', artCode: 'F3', artWord: 'DESTROY' },
+  F3_B2B: { family: 'midfielder', theme: 'legendGold', artCode: 'F3', artWord: 'B2B' },
+  F3_AM: { family: 'midfielder', theme: 'holoPurple', artCode: 'F3', artWord: 'MAESTRO' },
+  F3_CTR: { family: 'midfielder', theme: 'obsidianChrome', artCode: 'F3', artWord: 'CONTROL' },
+  F3_CAR: { family: 'midfielder', theme: 'emeraldStrike', artCode: 'F3', artWord: 'CARRIER' },
+  F3_HB: { family: 'midfielder', theme: 'royalIce', artCode: 'F3', artWord: 'SHIELD' },
+  F3_SS: { family: 'midfielder', theme: 'infernoRed', artCode: 'F3', artWord: 'LATE RUN' },
+  F4_CR: { family: 'wing', theme: 'legendGold', artCode: 'F4', artWord: 'CROSSER' },
+  F4_IN: { family: 'wing', theme: 'infernoRed', artCode: 'F4', artWord: 'INSIDE' },
+  F4_WB: { family: 'wing', theme: 'emeraldStrike', artCode: 'F4', artWord: 'WINGBACK' },
+  F4_WP: { family: 'wing', theme: 'royalIce', artCode: 'F4', artWord: 'WIDE PLAY' },
+  F4_SP: { family: 'wing', theme: 'infernoRed', artCode: 'F4', artWord: 'SPRINTER' },
+  F5_PO: { family: 'striker', theme: 'legendGold', artCode: 'F5', artWord: 'POACHER' },
+  F5_TG: { family: 'striker', theme: 'obsidianChrome', artCode: 'F5', artWord: 'TARGET' },
+  F5_RF: { family: 'striker', theme: 'holoPurple', artCode: 'F5', artWord: 'RAUM' },
+  F5_PF: { family: 'striker', theme: 'emeraldStrike', artCode: 'F5', artWord: 'PRESS 9' },
+  F5_AF: { family: 'striker', theme: 'infernoRed', artCode: 'F5', artWord: 'ARROW' },
+  F5_CF: { family: 'striker', theme: 'legendGold', artCode: 'F5', artWord: 'PHENOM' },
+};
+
+const CARD_ART_VERSION = '2025061017';
+
+const CARD_ART_ASSETS = Object.fromEntries(
+  Object.keys(ARCHETYPE_CARD_PROFILES).map((id) => [
+    id,
+    `./assets/scout-cards/${id}.png?v=${CARD_ART_VERSION}`,
+  ]),
+);
+
+const CARD_RENDER_TARGETS = {
+  main: {
+    card: 'player-card',
+    illustration: 'player-illustration',
+    fallback: 'card-art-fallback',
+    radar: 'card-radar',
+    fields: {
+      archetypeId: 'card-archetype-id',
+      rating: 'card-rating',
+      title: 'card-title',
+      playlevel: 'card-playlevel',
+      match: 'card-match',
+      tagline: 'card-tagline',
+      kicker: 'card-kicker',
+      artCode: 'card-art-code',
+      artWord: 'card-art-word',
+    },
+  },
+  share: {
+    card: 'share-player-card',
+    illustration: 'share-player-illustration',
+    fallback: 'share-card-art-fallback',
+    radar: null,
+    fields: {
+      archetypeId: 'share-card-archetype-id',
+      rating: 'share-card-rating',
+      title: 'share-card-title',
+      playlevel: 'share-card-playlevel',
+      match: 'share-card-match',
+      tagline: 'share-card-tagline',
+      kicker: 'share-card-kicker',
+      artCode: 'share-card-art-code',
+      artWord: 'share-card-art-word',
+    },
+  },
 };
 
 const $ = (id) => document.getElementById(id);
@@ -60,39 +162,133 @@ function showStep(stepId) {
   });
 }
 
-function buildQuizItems() {
-  quizItems = [
+function buildAllQuizItems() {
+  return [
     { part: '基本信息', type: 'checkbox', data: questions.q0, answerKey: 'q0' },
-    ...questions.style.map((q) => ({
+    ...questions.style.map((q, styleIndex) => ({
       part: '风格定位',
       type: 'radio',
       data: q,
       answerKey: 'style',
-      styleIndex: questions.style.indexOf(q),
+      styleIndex,
     })),
-    ...questions.intensity.map((q) => ({
+    ...questions.intensity.map((q, intensityIndex) => ({
       part: '强度与环境',
       type: 'radio',
       data: q,
       answerKey: 'intensity',
-      intensityIndex: questions.intensity.indexOf(q),
+      intensityIndex,
     })),
-    ...questions.literacy.map((q) => ({
+    ...questions.literacy.map((q, literacyIndex) => ({
       part: '战术素养',
       type: 'radio',
       data: q,
       answerKey: 'literacy',
-      literacyIndex: questions.literacy.indexOf(q),
+      literacyIndex,
     })),
   ];
 }
 
+function buildQuizItems(mode = quizMode) {
+  const allItems = buildAllQuizItems();
+  if (mode === 'lite') {
+    quizItems = [allItems[0], ...allItems.slice(1, 1 + LITE_STYLE_COUNT)];
+    return;
+  }
+  quizItems = allItems;
+}
+
+function pickDefaultOptionKey(question) {
+  const options = question?.options || [];
+  if (!options.length) return null;
+  const middle = options[Math.floor((options.length - 1) / 2)];
+  return middle?.key ?? options[0].key;
+}
+
+/** 球迷版仅答 10 题，提交前为后端计分补齐中性默认项 */
+function fillLitePayload(payload) {
+  const filled = {
+    q0: [...(payload.q0 || [])],
+    style: [...payload.style],
+    intensity: [...payload.intensity],
+    literacy: [...payload.literacy],
+  };
+
+  for (let i = LITE_STYLE_COUNT; i < questions.style.length; i += 1) {
+    if (filled.style[i] == null || filled.style[i] === '') {
+      const opts = questions.style[i]?.options || [];
+      const fallback = opts.find((o) => o.key === 'C') || opts[0];
+      filled.style[i] = fallback?.key ?? null;
+    }
+  }
+
+  questions.intensity.forEach((q, i) => {
+    if (filled.intensity[i] == null || filled.intensity[i] === '') {
+      filled.intensity[i] = pickDefaultOptionKey(q);
+    }
+  });
+
+  questions.literacy.forEach((q, i) => {
+    if (filled.literacy[i] == null || filled.literacy[i] === '') {
+      filled.literacy[i] = pickDefaultOptionKey(q);
+    }
+  });
+
+  return filled;
+}
+
+function resetQuizSession() {
+  answers = { q0: [], map: {} };
+  currentIndex = 0;
+  isAdvancingQuiz = false;
+  if (quizAdvanceTimer) {
+    clearTimeout(quizAdvanceTimer);
+    quizAdvanceTimer = null;
+  }
+}
+
+function startQuiz(mode) {
+  if (!questions) {
+    alert('题库尚未加载完成，请刷新页面后重试');
+    return;
+  }
+
+  quizMode = mode === 'lite' ? 'lite' : 'pro';
+  localStorage.setItem(MODE_KEY, quizMode);
+  resetQuizSession();
+  buildQuizItems(quizMode);
+  showStep('step-quiz');
+  renderQuestion();
+}
+
+function bindQuizTierButtons() {
+  const pricing = document.querySelector('.welcome-pricing');
+  if (!pricing || pricing.dataset.bound === '1') return;
+  pricing.dataset.bound = '1';
+
+  pricing.addEventListener('click', (event) => {
+    const liteBtn = event.target.closest('#btn-start-lite');
+    const proBtn = event.target.closest('#btn-start-pro');
+    if (liteBtn) {
+      event.preventDefault();
+      startQuiz('lite');
+      return;
+    }
+    if (proBtn) {
+      event.preventDefault();
+      startQuiz('pro');
+    }
+  });
+}
+
+function getQuestionKey(item) {
+  if (item.answerKey === 'q0') return '__q0__';
+  return item.data?.id || item.answerKey;
+}
+
 function getAnswerForItem(item) {
   if (item.answerKey === 'q0') return answers.q0;
-  if (item.answerKey === 'style') return answers.style[item.styleIndex];
-  if (item.answerKey === 'intensity') return answers.intensity[item.intensityIndex];
-  if (item.answerKey === 'literacy') return answers.literacy[item.literacyIndex];
-  return null;
+  return answers.map[getQuestionKey(item)] ?? null;
 }
 
 function setAnswerForItem(item, value) {
@@ -100,18 +296,90 @@ function setAnswerForItem(item, value) {
     answers.q0 = value;
     return;
   }
-  if (item.answerKey === 'style') {
-    while (answers.style.length <= item.styleIndex) answers.style.push(null);
-    answers.style[item.styleIndex] = value;
+  answers.map[getQuestionKey(item)] = value;
+}
+
+function buildSubmitPayload() {
+  return {
+    q0: [...(answers.q0 || [])],
+    style: questions.style.map((q) => answers.map[q.id] ?? null),
+    intensity: questions.intensity.map((q) => answers.map[q.id] ?? null),
+    literacy: questions.literacy.map((q) => answers.map[q.id] ?? null),
+  };
+}
+
+function findFirstUnansweredIndex() {
+  for (let i = 0; i < quizItems.length; i += 1) {
+    const item = quizItems[i];
+    const ans = getAnswerForItem(item);
+    if (item.type === 'checkbox') {
+      if (!Array.isArray(ans) || ans.length === 0) return i;
+    } else if (ans == null || ans === '') {
+      return i;
+    }
   }
-  if (item.answerKey === 'intensity') {
-    while (answers.intensity.length <= item.intensityIndex) answers.intensity.push(null);
-    answers.intensity[item.intensityIndex] = value;
+  return -1;
+}
+
+function gotoFirstUnanswered() {
+  const idx = findFirstUnansweredIndex();
+  if (idx >= 0) {
+    isAdvancingQuiz = false;
+    if (quizAdvanceTimer) {
+      clearTimeout(quizAdvanceTimer);
+      quizAdvanceTimer = null;
+    }
+    currentIndex = idx;
+    renderQuestion();
   }
-  if (item.answerKey === 'literacy') {
-    while (answers.literacy.length <= item.literacyIndex) answers.literacy.push(null);
-    answers.literacy[item.literacyIndex] = value;
+}
+
+function validateSubmitPayload(payload, mode = quizMode) {
+  if (!Array.isArray(payload.q0) || payload.q0.length === 0) {
+    return '请至少选择一个场上位置';
   }
+
+  if (mode === 'lite') {
+    let answered = 0;
+    for (let i = 0; i < LITE_STYLE_COUNT; i += 1) {
+      if (payload.style[i] != null && payload.style[i] !== '') answered += 1;
+    }
+    if (answered < LITE_STYLE_COUNT) {
+      return `风格题未完成（${answered}/${LITE_STYLE_COUNT}）`;
+    }
+    return null;
+  }
+
+  const checks = [
+    ['style', '风格', questions.style.length],
+    ['intensity', '强度', questions.intensity.length],
+    ['literacy', '素养', questions.literacy.length],
+  ];
+
+  for (const [key, label, expected] of checks) {
+    const list = payload[key];
+    let answered = 0;
+    for (let i = 0; i < expected; i += 1) {
+      if (list[i] != null && list[i] !== '') answered += 1;
+    }
+    if (answered < expected) {
+      const missing = questions[key]
+        .filter((q, i) => list[i] == null || list[i] === '')
+        .map((q) => q.id)
+        .join('、');
+      return `${label}题未完成（${answered}/${expected}）${missing ? `，缺：${missing}` : ''}`;
+    }
+  }
+
+  return null;
+}
+
+/** S1–S10 选项展示时去掉括号内提示语，避免心理暗示；JSON 与计分 tags 不变 */
+function formatIntensityOptionLabel(label) {
+  return String(label)
+    .replace(/[（(][^）)]*[）)]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function renderQuestion() {
@@ -122,6 +390,9 @@ function renderQuestion() {
   $('progress-bar').style.width = `${((currentIndex + 1) / total) * 100}%`;
   $('progress-text').textContent = `${currentIndex + 1} / ${total}`;
   $('part-badge').textContent = item.part;
+
+  const wm = $('question-watermark');
+  if (wm) wm.textContent = String(currentIndex + 1).padStart(2, '0');
 
   const prefix = q.id ? `${q.id}. ` : '';
   const titleText = q.text || (item.answerKey === 'q0' ? '你最常踢的位置是？（多选，最多2项）' : '');
@@ -148,9 +419,13 @@ function renderQuestion() {
 
     const keyLabel =
       item.type === 'checkbox' ? String(optIdx + 1) : opt.key;
+    const displayLabel =
+      item.answerKey === 'intensity'
+        ? formatIntensityOptionLabel(opt.label)
+        : opt.label;
     el.innerHTML = `
       <span class="option-key">${keyLabel}</span>
-      <span class="option-label">${opt.label}</span>
+      <span class="option-label">${displayLabel}</span>
     `;
 
     el.addEventListener('click', () => onOptionClick(item, opt.key, el));
@@ -162,6 +437,8 @@ function renderQuestion() {
 }
 
 function onOptionClick(item, key, el) {
+  if (isAdvancingQuiz) return;
+
   if (item.type === 'checkbox') {
     let selected = [...(answers.q0 || [])];
     const idx = selected.indexOf(key);
@@ -185,13 +462,17 @@ function onOptionClick(item, key, el) {
   document.querySelectorAll('#options .option').forEach((n) => n.classList.remove('selected'));
   el.classList.add('selected');
 
-  setTimeout(() => {
+  isAdvancingQuiz = true;
+  if (quizAdvanceTimer) clearTimeout(quizAdvanceTimer);
+  quizAdvanceTimer = setTimeout(() => {
+    quizAdvanceTimer = null;
     if (currentIndex < quizItems.length - 1) {
       currentIndex += 1;
       renderQuestion();
     } else {
       submitQuiz();
     }
+    isAdvancingQuiz = false;
   }, 280);
 }
 
@@ -223,12 +504,20 @@ function prevQuestion() {
 }
 
 async function submitQuiz() {
-  if (!canProceed() && currentIndex === quizItems.length - 1) {
-    alert('请完成最后一题');
+  let payload = buildSubmitPayload();
+  const validationError = validateSubmitPayload(payload, quizMode);
+  if (validationError) {
+    alert(`${validationError}\n\n已跳转到第一道未完成的题目。`);
+    gotoFirstUnanswered();
     return;
   }
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+  if (quizMode === 'lite') {
+    payload = fillLitePayload(payload);
+  }
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  localStorage.setItem(MODE_KEY, quizMode);
   showStep('step-loading');
 
   let msgIdx = 0;
@@ -240,7 +529,7 @@ async function submitQuiz() {
   try {
     const minLoading = new Promise((resolve) => setTimeout(resolve, 2600));
     const [result] = await Promise.all([
-      window.SoccerAPI.submitAnswers(answers),
+      window.SoccerAPI.submitAnswers(payload),
       minLoading,
     ]);
     reportData = result;
@@ -254,7 +543,7 @@ async function submitQuiz() {
     alert(
       '报告生成失败：' +
         (err.message || '请检查云函数是否已部署') +
-        '\n\n本地预览可先部署 calculateReport 云函数。'
+        '\n\n如刚更新过题库，请刷新页面后重新测试。'
     );
     showStep('step-quiz');
   }
@@ -263,6 +552,13 @@ async function submitQuiz() {
 function showPaywallPreview(data) {
   $('preview-title').textContent = data.archetype_title || '已匹配原型';
   $('preview-score').textContent = `PlayLevel · ${Number(data.playlevel_score ?? 0).toFixed(2)}`;
+  const storedMode = localStorage.getItem(MODE_KEY);
+  if (storedMode === 'lite' || storedMode === 'pro') {
+    quizMode = storedMode;
+  }
+  const price = PAYWALL_PRICES[quizMode] ?? PAYWALL_PRICES.pro;
+  const priceEl = $('paywall-price');
+  if (priceEl) priceEl.textContent = `¥${price}`;
 }
 
 function getCardVariant(data) {
@@ -279,6 +575,49 @@ function getCardVariant(data) {
 function setCardText(id, value) {
   const el = $(id);
   if (el) el.textContent = value;
+}
+
+function applyCardTheme(card, profile) {
+  const theme = CARD_THEME_PRESETS[profile.theme] || CARD_THEME_PRESETS.legendGold;
+  card.style.setProperty('--card-accent', theme.accent);
+  card.style.setProperty('--card-accent-2', theme.accent2);
+  card.style.setProperty('--card-foil-a', theme.foilA);
+  card.style.setProperty('--card-foil-b', theme.foilB);
+  card.style.setProperty('--card-glow', theme.glow);
+  card.style.setProperty('--card-panel', theme.panel);
+}
+
+function setupPlayerCardInteraction() {
+  const card = $('player-card');
+  if (!card) return;
+
+  card.addEventListener('mouseenter', () => {
+    card.classList.add('is-hover');
+  });
+
+  card.addEventListener('mouseleave', () => {
+    card.classList.remove('is-hover');
+    card.style.setProperty('--tilt-x', '0deg');
+    card.style.setProperty('--tilt-y', '0deg');
+    card.style.setProperty('--mx', '50%');
+    card.style.setProperty('--my', '50%');
+    card.style.setProperty('--foil-x', '50%');
+    card.style.setProperty('--foil-y', '50%');
+  });
+
+  card.addEventListener('mousemove', (event) => {
+    const rect = card.getBoundingClientRect();
+    const px = (event.clientX - rect.left) / rect.width;
+    const py = (event.clientY - rect.top) / rect.height;
+    const rotateY = (px - 0.5) * 30;
+    const rotateX = (0.5 - py) * 30;
+    card.style.setProperty('--tilt-x', `${rotateX.toFixed(2)}deg`);
+    card.style.setProperty('--tilt-y', `${rotateY.toFixed(2)}deg`);
+    card.style.setProperty('--mx', `${(px * 100).toFixed(1)}%`);
+    card.style.setProperty('--my', `${(py * 100).toFixed(1)}%`);
+    card.style.setProperty('--foil-x', `${(100 - px * 70).toFixed(1)}%`);
+    card.style.setProperty('--foil-y', `${(py * 100).toFixed(1)}%`);
+  });
 }
 
 const ARCHETYPE_ACTIONS = {
@@ -363,32 +702,58 @@ function buildSilhouetteSvg(archetypeId, variant) {
   `;
 }
 
-function renderPlayerCard(data) {
+function renderPlayerCard(data, targetKey = 'main') {
+  const target = CARD_RENDER_TARGETS[targetKey] || CARD_RENDER_TARGETS.main;
   const archetypeId = data?.archetype_id || 'F3_B2B';
   const profile = ARCHETYPE_CARD_PROFILES[archetypeId] || ARCHETYPE_CARD_PROFILES.F3_B2B;
-  const variant = getCardVariant(data);
   const copy = data?.copy_data || {};
   const rating = Math.round(Number(data?.playlevel_score || 0) * 10);
+  const fields = target.fields;
 
-  setCardText('card-archetype-id', archetypeId);
-  setCardText('card-rating', String(rating).padStart(2, '0'));
-  setCardText('card-title', data?.archetype_title || copy.title || '未知原型');
-  setCardText('card-playlevel', Number(data?.playlevel_score || 0).toFixed(2));
-  setCardText('card-match', `${Math.round(data?.hybrid_percentage || 100)}%`);
+  setCardText(fields.archetypeId, archetypeId);
+  setCardText(fields.rating, String(rating).padStart(2, '0'));
+  setCardText(fields.title, data?.archetype_title || copy.title || '未知原型');
+  setCardText(fields.playlevel, Number(data?.playlevel_score || 0).toFixed(2));
+  setCardText(fields.match, `${Math.round(data?.hybrid_percentage || 100)}%`);
   setCardText(
-    'card-tagline',
+    fields.tagline,
     copy.tagline || '你的主 Archetype 已锁定，全面球探报告正在展开。',
   );
 
-  const card = $('player-card');
-  const silhouette = $('player-silhouette');
-  const cardRadar = $('card-radar');
-  if (!card || !silhouette) return false;
+  const card = $(target.card);
+  const illustration = $(target.illustration);
+  const fallback = $(target.fallback);
+  const cardRadar = target.radar ? $(target.radar) : null;
+  if (!card || !illustration || !fallback) return false;
 
-  card.style.setProperty('--card-accent', profile.accent);
-  card.className = `player-card family-${profile.family} is-reveal`;
-  silhouette.className = `player-silhouette pose-${profile.pose} variant-${variant}`;
-  silhouette.innerHTML = buildSilhouetteSvg(archetypeId, variant);
+  card.className = `player-card${targetKey === 'share' ? ' share-player-card' : ''} family-${profile.family} is-reveal`;
+  card.classList.remove('has-art');
+  card.dataset.archetype = archetypeId;
+  card.style.removeProperty('--card-shield-mask');
+  applyCardTheme(card, profile);
+
+  setCardText(fields.kicker, profile.artWord || 'ELITE');
+  setCardText(fields.artCode, profile.artCode || archetypeId.slice(0, 2));
+  setCardText(fields.artWord, profile.artWord || 'ELITE');
+
+  fallback.classList.add('hidden');
+  illustration.classList.add('hidden');
+  illustration.removeAttribute('src');
+  illustration.removeAttribute('crossorigin');
+  const artUrl = CARD_ART_ASSETS[archetypeId];
+  illustration.onload = () => {
+    illustration.classList.remove('hidden');
+    fallback.classList.add('hidden');
+    card.classList.add('has-art');
+    card.style.setProperty('--card-shield-mask', `url("${artUrl}")`);
+  };
+  illustration.onerror = () => {
+    illustration.classList.add('hidden');
+    fallback.classList.remove('hidden');
+    card.classList.remove('has-art');
+    card.style.removeProperty('--card-shield-mask');
+  };
+  illustration.src = artUrl;
 
   if (cardRadar && data?.radar_data?.length && window.drawRadarChart) {
     drawRadarChart(cardRadar, data.radar_data);
@@ -408,10 +773,82 @@ function collapseReportBody() {
   if (btn) btn.classList.remove('hidden');
 }
 
-function openUnlockedReport(data) {
+function celebrateCardReveal(data) {
+  if (!window.SoccerConfetti) return;
+  const archetypeId = data?.archetype_id || 'F3_B2B';
+  const profile = ARCHETYPE_CARD_PROFILES[archetypeId] || ARCHETYPE_CARD_PROFILES.F3_B2B;
+  const theme = CARD_THEME_PRESETS[profile.theme] || CARD_THEME_PRESETS.legendGold;
+  const card = $('player-card');
+
+  card?.classList.add('is-celebrating');
+  window.setTimeout(() => card?.classList.remove('is-celebrating'), 1400);
+
+  window.setTimeout(() => {
+    const rect = card?.getBoundingClientRect();
+    const originY = rect ? rect.top + rect.height * 0.32 : window.innerHeight * 0.38;
+    window.SoccerConfetti.fireCardCelebration({
+      colors: [theme.accent, theme.accent2, theme.foilA, theme.foilB, '#ffffff', '#59f1ff', '#ff6bb5'],
+      originY,
+    });
+  }, 320);
+}
+
+function setSharedViewUI(active) {
+  $('btn-view-report')?.classList.toggle('hidden', active);
+}
+
+function setReportFooterMode(mode) {
+  const shareBtn = $('btn-share');
+  const restartBtn = $('btn-restart');
+  if (restartBtn) restartBtn.textContent = '我要测试';
+  if (mode === 'shared') {
+    shareBtn?.classList.add('hidden');
+  } else {
+    shareBtn?.classList.remove('hidden');
+  }
+}
+
+function buildSharedReportData(archetypeId, playlevel, copyPack) {
+  const arch = copyPack?.archetypes?.[archetypeId];
+  const base = arch?.base || {};
+  const score = Number.parseFloat(playlevel) || 0;
+  return {
+    archetype_id: archetypeId,
+    archetype_title: base.title || archetypeId,
+    playlevel_score: score,
+    hybrid_percentage: 100,
+    is_hybrid: false,
+    copy_data: {
+      title: base.title || archetypeId,
+      tagline: base.tagline || '',
+      description: base.description || '',
+      strengths: base.strengths || [],
+      weaknesses: base.weaknesses || [],
+    },
+    radar_data: [],
+  };
+}
+
+function openSharedReport(data) {
+  isSharedView = true;
+  reportData = data;
   if (!renderPlayerCard(data)) return;
+  setSharedViewUI(true);
+  window.SoccerShare?.applyReport(data);
+  setReportFooterMode('shared');
   collapseReportBody();
   showStep('step-report');
+}
+
+function openUnlockedReport(data) {
+  isSharedView = false;
+  if (!renderPlayerCard(data)) return;
+  setSharedViewUI(false);
+  window.SoccerShare?.applyReport(data);
+  setReportFooterMode('owner');
+  collapseReportBody();
+  showStep('step-report');
+  celebrateCardReveal(data);
 }
 
 function expandReportSections() {
@@ -517,7 +954,6 @@ function renderScoutProfile(profile) {
       </div>
       <div class="scout-bar"><i style="width:${Math.max(8, item.score * 10)}%"></i></div>
       <em>${item.band}</em>
-      <p>${item.desc}</p>
     `;
     gridEl.appendChild(card);
   });
@@ -563,18 +999,46 @@ function renderReport(data) {
     weakEl.appendChild(li);
   });
 
-  $('report-intensity-tone').textContent =
-    (copy.intensity_tone || '') +
-    (copy.literacy_desc ? '\n\n' + copy.literacy_desc : '');
+  $('report-intensity-tone').textContent = copy.intensity_tone || '';
+
+  const literacyNoteEl = $('report-literacy-note');
+  if (literacyNoteEl) {
+    literacyNoteEl.textContent = copy.literacy_desc || '';
+  }
 
   const trainEl = $('report-training');
+  const trainHighlightEl = $('report-training-highlight');
   trainEl.innerHTML = '';
-  if (copy.training) {
-    [copy.training.priority_1, copy.training.priority_2].filter(Boolean).forEach((t) => {
-      const li = document.createElement('li');
-      li.textContent = t;
-      trainEl.appendChild(li);
-    });
+  if (trainHighlightEl) {
+    trainHighlightEl.textContent = '';
+    trainHighlightEl.classList.add('hidden');
+  }
+
+  const trainingItems =
+    copy.training?.items?.length
+      ? copy.training.items
+      : [copy.training?.priority_1, copy.training?.priority_2]
+          .filter(Boolean)
+          .map((text) => ({ tag: '风格专项', text }));
+
+  trainingItems.forEach((item) => {
+    const li = document.createElement('li');
+    if (item.tag) {
+      const tag = document.createElement('span');
+      tag.className = 'training-item-tag';
+      tag.textContent = item.tag;
+      li.appendChild(tag);
+    }
+    const text = document.createElement('span');
+    text.className = 'training-item-text';
+    text.textContent = item.text;
+    li.appendChild(text);
+    trainEl.appendChild(li);
+  });
+
+  if (trainHighlightEl && copy.training?.highlight) {
+    trainHighlightEl.textContent = `本期划重点：${copy.training.highlight}`;
+    trainHighlightEl.classList.remove('hidden');
   }
   if (copy.formation_fit) {
     const f = copy.formation_fit;
@@ -582,13 +1046,33 @@ function renderReport(data) {
   }
 
   const ref = copy.style_reference || {};
-  $('report-disclaimer').textContent = ref.disclaimer || '';
-  $('report-core-ref').textContent = ref.core_ref || '';
-  $('report-sub-ref').textContent = ref.sub_ref || '';
-  $('report-avoid-ref').textContent = ref.avoid_ref || '';
-  $('report-hybrid-ref').textContent =
-    (data.is_hybrid && copy.hybrid_desc ? copy.hybrid_desc + ' ' : '') +
-    (ref.hybrid_add || '');
+  const setRefText = (id, value) => {
+    const el = $(id);
+    if (!el) return;
+    const text = value || '';
+    el.textContent = text;
+    el.classList.toggle('hidden', !text);
+  };
+
+  setRefText('report-disclaimer', ref.disclaimer || '');
+  setRefText('report-ref-spirit', ref.spirit_line || '');
+  setRefText('report-core-ref', ref.core_ref || '');
+  setRefText('report-core-scene', ref.core_scene || '');
+  setRefText('report-sub-ref', ref.sub_ref || '');
+  setRefText('report-sub-scene', ref.sub_scene || '');
+  setRefText('report-avoid-ref', ref.avoid_ref || '');
+  setRefText('report-avoid-why', ref.avoid_why || '');
+  setRefText('report-watch-tip', ref.watch_tip ? `看球学习：${ref.watch_tip}` : '');
+  setRefText('report-grassroots-note', ref.grassroots_note || '');
+
+  const hybridEl = $('report-hybrid-ref');
+  if (hybridEl) {
+    const hybridText =
+      (data.is_hybrid && copy.hybrid_desc ? copy.hybrid_desc + ' ' : '') +
+      (ref.hybrid_add || '');
+    hybridEl.textContent = hybridText;
+    hybridEl.classList.toggle('hidden', !hybridText);
+  }
 
   document.querySelector('.paywall-preview')?.classList.remove('blurred');
 }
@@ -606,34 +1090,51 @@ function unlockReport() {
 }
 
 function shareReport() {
-  const title = $('report-title').textContent;
-  const text = `我的足球 DNA：${title} · PlayLevel ${reportData?.playlevel_score}`;
-  if (navigator.share) {
-    navigator.share({ title: '足球 DNA 测试', text, url: location.href }).catch(() => {});
-  } else {
-    navigator.clipboard?.writeText(text + '\n' + location.href);
-    alert('报告摘要已复制');
+  if (!reportData) {
+    const cached = localStorage.getItem(REPORT_KEY);
+    if (cached) reportData = JSON.parse(cached);
   }
+  if (!reportData) {
+    alert('暂无报告数据，请先完成测试');
+    return;
+  }
+  if (window.SoccerShare?.shareFromReport) {
+    window.SoccerShare.shareFromReport(reportData);
+    return;
+  }
+  const title = $('report-title')?.textContent || reportData.archetype_title || '足球 DNA';
+  const text = `我的足球 DNA：${title} · PlayLevel ${reportData?.playlevel_score}`;
+  navigator.clipboard?.writeText(text + '\n' + location.href);
+  alert('报告摘要已复制');
 }
 
 function restart() {
+  window.SoccerConfetti?.stopCelebration();
+  isSharedView = false;
   reportExpanded = false;
   silhouetteVariant = null;
   collapseReportBody();
-  answers = { q0: [], style: [], intensity: [], literacy: [] };
+  resetQuizSession();
   reportData = null;
-  currentIndex = 0;
+  quizMode = 'pro';
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(REPORT_KEY);
+  localStorage.removeItem(MODE_KEY);
+  setSharedViewUI(false);
+  setReportFooterMode('owner');
+  const cleanUrl = location.origin + location.pathname;
+  if (location.href.split('#')[0] !== cleanUrl) {
+    history.replaceState(null, '', cleanUrl);
+  }
   showStep('step-welcome');
 }
 
 async function init() {
   try {
-    const res = await fetch('./data/questions.json');
+    const res = await fetch('./data/questions.json?v=2025061004');
     if (!res.ok) throw new Error(`题库加载失败 (${res.status})`);
     questions = await res.json();
-    buildQuizItems();
+    buildQuizItems('pro');
   } catch (err) {
     console.error(err);
     const welcome = $('step-welcome');
@@ -647,23 +1148,47 @@ async function init() {
     return;
   }
 
-  $('btn-start').addEventListener('click', () => {
-    currentIndex = 0;
-    showStep('step-quiz');
-    renderQuestion();
-  });
   $('btn-next').addEventListener('click', nextQuestion);
   $('btn-prev').addEventListener('click', prevQuestion);
   $('btn-unlock').addEventListener('click', unlockReport);
-  $('btn-ad-unlock').addEventListener('click', unlockReport);
   $('btn-view-report').addEventListener('click', expandReportSections);
   $('btn-share').addEventListener('click', shareReport);
   $('btn-restart').addEventListener('click', restart);
+  setupPlayerCardInteraction();
 
+  const shareParams = window.SoccerShare?.parseShareParams?.();
   const cachedReport = localStorage.getItem(REPORT_KEY);
+
+  if (shareParams && ARCHETYPE_CARD_PROFILES[shareParams.archetypeId]) {
+    if (cachedReport) {
+      reportData = JSON.parse(cachedReport);
+      openUnlockedReport(reportData);
+    } else {
+      try {
+        const copyRes = await fetch('./data/copy_pack.json?v=2025061104');
+        if (!copyRes.ok) throw new Error('copy_pack load failed');
+        const copyPack = await copyRes.json();
+        openSharedReport(
+          buildSharedReportData(shareParams.archetypeId, shareParams.playlevel, copyPack),
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    return;
+  }
+
   if (cachedReport) {
     reportData = JSON.parse(cachedReport);
   }
 }
 
+window.SoccerCard = {
+  renderPlayerCard,
+  ARCHETYPE_CARD_PROFILES,
+  CARD_ART_ASSETS,
+  CARD_THEME_PRESETS,
+};
+
+bindQuizTierButtons();
 init();
