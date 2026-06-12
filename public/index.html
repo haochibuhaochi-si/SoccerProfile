@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#090d16" />
-  <meta name="description" content="绿茵矩阵数字球探评估：10题趣味球迷版或35题硬核专业版，匹配24大战术原型、12维风格星图与可分享球星卡报告。" />
+  <meta name="description" content="绿茵矩阵数字球探评估：球迷版12题基础初筛¥0.99，专业版35题职业精算¥4.9，匹配24大战术原型、12维风格星图与可分享球星卡报告。" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="草根球星评测 · 数字球探系统" />
-  <meta property="og:description" content="10题快测球风 ¥0.99，或35题硬核深拆战力 ¥5.9。解锁专属球星卡与草根球员球探报告。" />
+  <meta property="og:description" content="球迷版12题基础初筛 ¥0.99，或35题职业精算 ¥4.9。解锁专属球星卡与草根球员球探报告。" />
   <meta property="og:image" content="./assets/scout-cards/F3_B2B.png" />
   <title>草根球星评测· 数字球探系统</title>
-  <link rel="stylesheet" href="./css/styles.css?v=2025061211" />
+  <link rel="stylesheet" href="./css/styles.css?v=2025061225" />
 </head>
 <body>
   <div id="app">
@@ -18,10 +18,12 @@
     <section id="step-welcome" class="step active">
       <div class="welcome-shell">
         <header class="welcome-brand">
-          <div class="welcome-logo" aria-hidden="true">⚽</div>
-          <h1 class="welcome-title">草根球星评测</h1>
+          <div class="welcome-title-row">
+            <div class="welcome-logo" aria-hidden="true">⚽</div>
+            <h1 class="welcome-title">草根球星评测</h1>
+          </div>
           <p class="welcome-label welcome-eyebrow">2026足球盛宴 · 业余玩家数字球探系统</p>
-          <p class="welcome-lead">双档测评矩阵：球迷版 10 题轻测球风，专业版 35 题深拆战力与球商基因。</p>
+          <p class="welcome-lead">双轨算力：<strong>[球迷版]</strong> 12题极速生成专属球星卡；<strong>[专业版]</strong> 35题硬核试炼，适合野球老兵，解锁 3 页纸球探报告。</p>
         </header>
 
         <section class="welcome-block" aria-label="解锁内容">
@@ -72,25 +74,22 @@
         </section>
 
         <div class="welcome-cta-block">
-          <p class="welcome-label welcome-block-label welcome-block-label--center">选择档位 · 点击开始</p>
-          <div class="welcome-pricing" aria-label="测评档位与价格">
+          <p class="welcome-label welcome-block-label welcome-block-label--center">选择试炼深度 · 点击开始</p>
+          <div class="welcome-pricing" aria-label="测评档位">
             <button type="button" class="welcome-pricing-tier welcome-pricing-tier--lite" id="btn-start-lite">
               <span class="welcome-label welcome-pricing-tag">球迷版</span>
-              <span class="welcome-card-title">10 题趣味快测</span>
-              <span class="welcome-pricing-price">¥0.99</span>
-              <span class="welcome-muted">基础球星卡 + 球风摘要</span>
+              <span class="welcome-pricing-action">12题基础初筛</span>
+              <span class="welcome-pricing-perks">生成专属球星卡 + 核心风格初探（含 Pro 版报告加密预览）</span>
             </button>
             <button type="button" class="welcome-pricing-tier welcome-pricing-tier--pro" id="btn-start-pro">
               <span class="welcome-pricing-badge" aria-hidden="true">PRO</span>
               <span class="welcome-label welcome-pricing-tag">专业版</span>
-              <span class="welcome-card-title">35 题硬核深拆</span>
-              <span class="welcome-pricing-price">¥5.9</span>
-              <span class="welcome-muted">完整雷达 + 深度报告全解锁</span>
+              <span class="welcome-pricing-action">35题职业精算</span>
+              <span class="welcome-pricing-perks">满血解锁：PlayLevel天梯评级 + 12维雷达矩阵 + 球探五维分析 + 最佳阵型及战术指引</span>
             </button>
           </div>
           <div class="welcome-notes">
-            <p class="welcome-muted welcome-micro">专业版限懂球老哥挑战，云玩家请绕道 💀</p>
-            <p class="welcome-footnote">安静环境手机作答 · 草根球员球探报告 · 支持分享球星卡</p>
+            <p class="welcome-pricing-disclaimer">👉 绿茵声明：本系统由草根球探数据室研发。您可根据答题深度，自由选择【0.99元球迷基础版】或【4.9元硬核专业版】解锁您的球探报告。白嫖党请绕道 💀。</p>
           </div>
         </div>
       </div>
@@ -145,11 +144,11 @@
         <p id="preview-score">PlayLevel · 5.8</p>
       </div>
       <div class="paywall-card">
-        <h2>解锁完整报告</h2>
-        <p>含雷达图、深度解析、强度分析、训练建议与风格参照系</p>
+        <h2 id="paywall-title">解锁完整报告</h2>
+        <p id="paywall-desc">含雷达图、深度解析、强度分析、训练建议与风格参照系</p>
         <div class="price-row">
-          <span class="price" id="paywall-price">¥5.9</span>
-          <span class="price-note">一次解锁 · 永久查看</span>
+          <span class="price" id="paywall-price">¥4.9</span>
+          <span class="price-note" id="paywall-note">一次解锁 · 永久查看</span>
         </div>
         <button type="button" class="btn btn-primary" id="btn-unlock">解锁我的报告</button>
       </div>
@@ -202,7 +201,7 @@
 
       <div id="report-body" class="report-body is-collapsed">
       <header class="report-header">
-        <p class="report-label">你的足球 DNA</p>
+        <p class="report-label" id="report-label">你的足球 DNA</p>
         <h1 id="report-title"></h1>
         <p class="report-tagline" id="report-tagline"></p>
         <div class="badge-row">
@@ -217,55 +216,66 @@
 
       <section class="report-block">
         <h3>风格星图</h3>
-        <p class="report-block-lead">风格 DNA · 12 维行为偏好全景（来自 Part1 场景题，反映「你怎么踢」）</p>
         <div class="radar-shell">
           <canvas id="radar-canvas" width="360" height="360" data-css-size="400"></canvas>
           <div class="radar-legend" id="radar-legend"></div>
-          <div class="radar-caption">亮色 = 你的主踢位置族 · 灰色 = 其他位置参考维度</div>
+          <div class="radar-caption" id="radar-caption">亮色 = 你的主踢位置族 · 灰色 = 其他位置参考维度</div>
         </div>
       </section>
 
       <section class="report-block">
         <h3>核心解析</h3>
         <p id="report-description"></p>
-        <div class="insight-grid" id="report-signatures"></div>
-        <div class="two-col">
-          <div>
-            <h4>优势</h4>
-            <ul id="report-strengths"></ul>
-          </div>
-          <div>
-            <h4>短板</h4>
-            <ul id="report-weaknesses"></ul>
-          </div>
-        </div>
-        <div class="analysis-panel">
-          <h4>比赛说明书</h4>
-          <div id="report-match-script" class="match-script"></div>
-        </div>
       </section>
 
-      <section class="report-block scout-block">
-        <h3>球探五维</h3>
-        <p class="report-block-lead">竞技画像 · 综合环境、执行、素养与风格的模型评分（非单一能力测验）</p>
-        <p class="report-literacy-note" id="report-literacy-note"></p>
-        <p class="scout-summary" id="report-scout-summary"></p>
-        <div class="scout-grid" id="report-scout-grid"></div>
-      </section>
-
-      <section class="report-block">
-        <h3>竞技强度分析</h3>
-        <p id="report-intensity-tone"></p>
-      </section>
-
-      <section class="report-block">
+      <section class="report-block report-block--training">
         <h3>训练建议</h3>
         <ol id="report-training"></ol>
-        <p class="training-highlight hidden" id="report-training-highlight"></p>
-        <p class="formation-fit" id="report-formation"></p>
       </section>
 
-      <section class="report-block style-ref-block">
+      <div class="report-upgrade-wrap hidden" id="report-upgrade-wrap">
+        <div class="report-upgrade-gate" id="report-upgrade-gate">
+          <p class="upgrade-lock-title">🔒 系统检测到您的战术风格极具挖掘潜力。</p>
+          <p class="upgrade-lock-desc">您的十二维数据雷达、短板漏洞及职业战术素养尚未激活。</p>
+          <p class="upgrade-lock-cta">👉 补齐剩余 23 道硬核沙盘题（仅需 +¥3.9），立即解锁完整版职业球探报告！</p>
+          <button type="button" class="btn btn-primary" id="btn-upgrade-pro">解锁完整版报告 · ¥3.9</button>
+        </div>
+      </div>
+
+      <div class="report-premium-sections" id="report-premium-sections">
+          <div class="insight-grid" id="report-signatures"></div>
+          <div class="two-col">
+            <div>
+              <h4>优势</h4>
+              <ul id="report-strengths"></ul>
+            </div>
+            <div>
+              <h4>短板</h4>
+              <ul id="report-weaknesses"></ul>
+            </div>
+          </div>
+          <div class="analysis-panel">
+            <h4>比赛说明书</h4>
+            <div id="report-match-script" class="match-script"></div>
+          </div>
+
+          <section class="report-block scout-block">
+            <h3>球探五维</h3>
+            <p class="report-block-lead">竞技画像 · 综合环境、执行、素养与风格的模型评分（非单一能力测验）</p>
+            <p class="report-literacy-note" id="report-literacy-note"></p>
+            <p class="scout-summary" id="report-scout-summary"></p>
+            <div class="scout-grid" id="report-scout-grid"></div>
+          </section>
+
+          <section class="report-block">
+            <h3>竞技强度分析</h3>
+            <p id="report-intensity-tone"></p>
+          </section>
+
+          <p class="training-highlight hidden" id="report-training-highlight"></p>
+          <p class="formation-fit" id="report-formation"></p>
+
+          <section class="report-block style-ref-block">
         <h3>风格参照系</h3>
         <p class="report-block-lead">职业球员仅作风格类比，帮你把抽象数据翻译成可感知的踢球画面</p>
         <p class="disclaimer" id="report-disclaimer"></p>
@@ -290,7 +300,8 @@
         <p class="ref-watch-tip" id="report-watch-tip"></p>
         <p class="ref-grassroots" id="report-grassroots-note"></p>
         <p class="hybrid-ref" id="report-hybrid-ref"></p>
-      </section>
+          </section>
+      </div>
 
       <footer class="report-footer">
         <button type="button" class="btn btn-primary" id="btn-share">分享报告</button>
@@ -349,12 +360,12 @@
 
   <!-- 微信内优先本地 SDK，避免外网 CDN 加载失败 -->
   <script src="./js/cloudbase.full.js"></script>
-  <script src="./js/radar.js?v=2025061029"></script>
-  <script src="./js/api.js?v=2025061106"></script>
+  <script src="./js/radar.js?v=2025061212"></script>
+  <script src="./js/api.js?v=2025061221"></script>
   <script src="./js/confetti.js?v=2025061029"></script>
   <script src="./js/html2canvas.min.js?v=1.4.1"></script>
   <script src="./js/card-capture.js?v=2025061112"></script>
-  <script src="./js/share.js?v=2025061111"></script>
-  <script src="./js/app.js?v=2025061211"></script>
+  <script src="./js/share.js?v=2025061214"></script>
+  <script src="./js/app.js?v=2025061222"></script>
 </body>
 </html>

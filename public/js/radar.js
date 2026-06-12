@@ -137,7 +137,9 @@ function drawRadarChart(canvas, radarData) {
   ctx.lineWidth = 1.2;
   ctx.stroke();
 
-  const activeIndices = radarData.map((d, i) => (d.active ? i : -1)).filter((i) => i >= 0);
+  const activeIndices = radarData
+    .map((d, i) => (d.active && d.measurable !== false ? i : -1))
+    .filter((i) => i >= 0);
   if (activeIndices.length) {
     ctx.shadowColor = 'rgba(0, 212, 255, 0.55)';
     ctx.shadowBlur = 16;
@@ -162,20 +164,31 @@ function drawRadarChart(canvas, radarData) {
 
   ghostPoints.forEach((p, i) => {
     const d = radarData[i];
+    const isMeasurable = d.measurable !== false;
+    ctx.save();
+    if (!isMeasurable) ctx.filter = 'blur(5px)';
     ctx.beginPath();
-    ctx.arc(p.x, p.y, d.active ? 4.2 : 2.6, 0, Math.PI * 2);
-    ctx.fillStyle = d.active
-      ? RADAR_FAMILIES[d.family]?.color || '#00d4ff'
-      : 'rgba(139, 155, 184, 0.55)';
+    ctx.arc(p.x, p.y, d.active && isMeasurable ? 4.2 : 2.6, 0, Math.PI * 2);
+    ctx.fillStyle =
+      !isMeasurable
+        ? 'rgba(139, 155, 184, 0.35)'
+        : d.active
+          ? RADAR_FAMILIES[d.family]?.color || '#00d4ff'
+          : 'rgba(139, 155, 184, 0.55)';
     ctx.fill();
+    ctx.restore();
   });
 
   radarData.forEach((d, i) => {
+    const isMeasurable = d.measurable !== false;
     const labelR = radius + (d.active ? (i % 2 === 0 ? 36 : 44) : (i % 2 === 0 ? 52 : 60));
     const labelPoint = pointAt(i, labelR);
     const labelText = d.full_label || d.label;
 
-    if (d.active) {
+    ctx.save();
+    if (!isMeasurable) ctx.filter = 'blur(6px)';
+
+    if (d.active && isMeasurable) {
       drawRadarLabel(
         ctx,
         d.label,
@@ -194,10 +207,13 @@ function drawRadarChart(canvas, radarData) {
         score >= 7 ? '#7ff7ff' : score <= 3.5 ? '#ffb199' : '#f3f7ff',
         `700 11px ${RADAR_FONT}`,
       );
+      ctx.restore();
       return;
     }
 
-    const inactiveColor = 'rgba(228, 236, 248, 0.94)';
+    const inactiveColor = isMeasurable
+      ? 'rgba(228, 236, 248, 0.94)'
+      : 'rgba(139, 155, 184, 0.45)';
     const inactiveFont = `500 10.5px ${RADAR_FONT}`;
     if (labelText.length > 5) {
       const mid = Math.ceil(labelText.length / 2);
@@ -206,6 +222,7 @@ function drawRadarChart(canvas, radarData) {
     } else {
       drawRadarLabel(ctx, labelText, labelPoint.x, labelPoint.y, inactiveColor, inactiveFont);
     }
+    ctx.restore();
   });
 
   ctx.fillStyle = 'rgba(232, 237, 247, 0.2)';

@@ -1,5 +1,5 @@
 const cloud = require('@cloudbase/node-sdk');
-const { calculateReport } = require('./lib/calculator');
+const { calculateReport, LITE_STYLE_COUNT } = require('./lib/calculator');
 const questions = require('./data/questions.json');
 
 cloud.init({ env: cloud.SYMBOL_CURRENT_ENV });
@@ -28,7 +28,16 @@ function extractPayload(event) {
   const body = typeof event === 'string' ? JSON.parse(event) : event;
   const raw = body?.data && typeof body.data === 'object' ? body.data : body;
 
+  const reportTier = raw?.report_tier === 'lite' ? 'lite' : 'pro';
+
+  const lockedPrimaryId =
+    typeof raw?.locked_primary_id === 'string' && raw.locked_primary_id.trim()
+      ? raw.locked_primary_id.trim()
+      : null;
+
   return {
+    report_tier: reportTier,
+    locked_primary_id: lockedPrimaryId,
     q0: Array.isArray(raw?.q0) ? raw.q0 : [],
     style: normalizeAnswerList(raw?.style, questions.style.length),
     intensity: normalizeAnswerList(raw?.intensity, questions.intensity.length),
@@ -41,6 +50,17 @@ function validatePayload(payload) {
 
   if (!Array.isArray(payload.q0) || payload.q0.length === 0) {
     return '请至少选择一个场上位置';
+  }
+
+  if (payload.report_tier === 'lite') {
+    let answered = 0;
+    for (let i = 0; i < LITE_STYLE_COUNT; i += 1) {
+      if (payload.style[i] != null && payload.style[i] !== '') answered += 1;
+    }
+    if (answered < LITE_STYLE_COUNT) {
+      return `风格题未完成（${answered}/${LITE_STYLE_COUNT}），请完成球迷版全部风格题后再提交`;
+    }
+    return null;
   }
 
   for (const key of ['style', 'intensity', 'literacy']) {

@@ -345,7 +345,7 @@ function getCandidatePool(q0Keys, prototypes) {
   return [...ids];
 }
 
-function matchArchetypes(userVec, q0Keys, prototypes) {
+function matchArchetypes(userVec, q0Keys, prototypes, lockedPrimaryId = null) {
   const userArr = vectorToArray(userVec);
   const axisWeights = buildAxisWeights(q0Keys);
   const weightArr = AXES.map((axis) => axisWeights[axis]);
@@ -360,8 +360,20 @@ function matchArchetypes(userVec, q0Keys, prototypes) {
     .sort((a, b) => b.similarity - a.similarity);
 
   const pool = getCandidatePool(q0Keys, prototypes);
-  const primary = ranked.find((r) => pool.includes(r.id)) || ranked[0];
-  const secondary = ranked.find((r) => r.id !== primary.id) || ranked[1];
+  let primary;
+  if (lockedPrimaryId && prototypes.prototypes[lockedPrimaryId]) {
+    primary = ranked.find((r) => r.id === lockedPrimaryId) || {
+      id: lockedPrimaryId,
+      similarity: ranked[0]?.similarity ?? 0,
+    };
+  } else {
+    primary = ranked.find((r) => pool.includes(r.id)) || ranked[0];
+  }
+
+  const secondary =
+    ranked.find((r) => r.id !== primary.id) ||
+    ranked.find((r) => r.id !== lockedPrimaryId) ||
+    ranked[1];
 
   const hybridPct =
     primary.similarity > 0
@@ -376,6 +388,8 @@ function matchArchetypes(userVec, q0Keys, prototypes) {
     hybrid_percentage: Math.round(hybridPct),
     primary_similarity: primary.similarity,
     secondary_similarity: secondary.similarity,
+    primary_locked: Boolean(lockedPrimaryId && prototypes.prototypes[lockedPrimaryId]),
+    locked_primary_id: lockedPrimaryId || null,
   };
 }
 
@@ -509,6 +523,55 @@ function buildAxisCoverage(styleQuestions) {
   return coverage;
 }
 
+/** 仅统计已作答风格题对各轴的触达次数（球迷版雷达用） */
+function buildAxisCoverageFromAnswers(styleQuestions, styleAnswers) {
+  const coverage = Object.fromEntries(AXES.map((a) => [a, 0]));
+  (styleQuestions || []).forEach((q, idx) => {
+    const key = styleAnswers?.[idx];
+    if (!key) return;
+    const opt = q.options.find((o) => o.key === key);
+    if (!opt) return;
+    const axesInQ = new Set();
+    (opt.tags || []).forEach((tag) => {
+      if (tag.type === 'axis' && tag.axis in coverage) axesInQ.add(tag.axis);
+    });
+    axesInQ.forEach((axis) => {
+      coverage[axis] += 1;
+    });
+  });
+  return coverage;
+}
+
+function pickDefaultOptionKey(question) {
+  const options = question?.options || [];
+  if (!options.length) return null;
+  const middle = options[Math.floor((options.length - 1) / 2)];
+  return middle?.key ?? options[0].key;
+}
+
+function fillLiteServerDefaults(questions, payload) {
+  const intensity = [...(payload.intensity || [])];
+  const literacy = [...(payload.literacy || [])];
+
+  questions.intensity.forEach((q, i) => {
+    if (intensity[i] == null || intensity[i] === '') {
+      intensity[i] = pickDefaultOptionKey(q);
+    }
+  });
+  questions.literacy.forEach((q, i) => {
+    if (literacy[i] == null || literacy[i] === '') {
+      literacy[i] = pickDefaultOptionKey(q);
+    }
+  });
+
+  return {
+    ...payload,
+    style: [...(payload.style || [])],
+    intensity,
+    literacy,
+  };
+}
+
 function radarVisualValue(raw, coverage, isActive) {
   const confidence = Math.min(1, (coverage || 0) / 3);
   const adjusted = raw * confidence + 5 * (1 - confidence);
@@ -517,7 +580,7 @@ function radarVisualValue(raw, coverage, isActive) {
   return Math.round(clamp(visual, floor, 10) * 10) / 10;
 }
 
-function buildRadarData(vector, q0Keys, styleQuestions) {
+function buildRadarData(vector, q0Keys, styleQuestions, styleAnswers, reportTier = 'pro') {
   const selected = new Set(q0Keys || []);
   const primary = q0Keys?.[0] || 'midfielder';
   const familyByAxis = {
@@ -526,13 +589,17 @@ function buildRadarData(vector, q0Keys, styleQuestions) {
     F4: 'wing',
     F5: 'striker',
   };
-  const coverage = buildAxisCoverage(styleQuestions);
+  const useAnsweredCoverage = reportTier === 'lite';
+  const coverage = useAnsweredCoverage
+    ? buildAxisCoverageFromAnswers(styleQuestions, styleAnswers)
+    : buildAxisCoverage(styleQuestions);
 
   return AXES.map((k) => {
     const family = familyByAxis[k.slice(0, 2)];
     const meta = AXIS_META[k];
     const raw = Math.round((vector[k] ?? 5) * 10) / 10;
     const active = selected.size ? selected.has(family) : family === primary;
+    const measurable = !useAnsweredCoverage || coverage[k] > 0;
     return {
       axis: k,
       family,
@@ -542,6 +609,7 @@ function buildRadarData(vector, q0Keys, styleQuestions) {
       visual_value: radarVisualValue(raw, coverage[k], active),
       coverage: coverage[k],
       active,
+      measurable,
     };
   });
 }
@@ -848,20 +916,29 @@ function assembleCopy(copyPack, archetypeId, secondaryId, isHybrid, intensityBan
   };
 }
 
+const LITE_STYLE_COUNT = 12;
+
 function calculateReport(payload) {
   const questions = loadJson('questions.json');
   const copyPack = loadJson('copy_pack.json');
   const prototypes = loadJson('archetype_prototypes.json');
+
+  const reportTier = payload.report_tier === 'lite' ? 'lite' : 'pro';
+  const normalized =
+    reportTier === 'lite' ? fillLiteServerDefaults(questions, payload) : payload;
 
   const {
     q0 = [],
     style = [],
     intensity = [],
     literacy = [],
-  } = payload;
+    locked_primary_id: lockedPrimaryId = null,
+  } = normalized;
 
   const styleVec = computeStyleVector(questions.style, style);
-  const match = matchArchetypes(styleVec, q0, prototypes);
+  const lockId =
+    lockedPrimaryId && prototypes.prototypes[lockedPrimaryId] ? lockedPrimaryId : null;
+  const match = matchArchetypes(styleVec, q0, prototypes, lockId);
   const litCorrect = countLiteracyCorrect(questions.literacy, literacy);
   const play = computePlayLevel(questions.intensity, intensity, litCorrect, styleVec);
   const intensityBand = mapIntensityBand(play.playlevel_score);
@@ -879,6 +956,9 @@ function calculateReport(payload) {
   const deepReport = buildDeepReport(styleVec, match, play, literacyBand, litCorrect, q0, questions.style);
 
   return {
+    report_tier: reportTier,
+    primary_locked: match.primary_locked || false,
+    locked_primary_id: match.locked_primary_id,
     q0_positions: q0,
     archetype_id: match.archetype_id,
     archetype_title: copyData?.title || archBase?.title,
@@ -890,11 +970,11 @@ function calculateReport(payload) {
     intensity_band: intensityBand,
     literacy_band: literacyBand,
     literacy_correct: litCorrect,
-    radar_data: buildRadarData(styleVec, q0, questions.style),
+    radar_data: buildRadarData(styleVec, q0, questions.style, style, reportTier),
     style_vector: styleVec,
     deep_report: deepReport,
     copy_data: copyData,
   };
 }
 
-module.exports = { calculateReport, AXES };
+module.exports = { calculateReport, AXES, LITE_STYLE_COUNT };

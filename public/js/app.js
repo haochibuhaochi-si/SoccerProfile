@@ -4,8 +4,12 @@
 const STORAGE_KEY = 'soccer_profile_answers';
 const REPORT_KEY = 'soccer_profile_report';
 const MODE_KEY = 'soccer_profile_mode';
-const LITE_STYLE_COUNT = 9;
-const PAYWALL_PRICES = { lite: 0.99, pro: 5.9 };
+const LITE_STYLE_COUNT = 12;
+const FULL_QUIZ_COUNT = 35;
+const UPGRADE_QUESTION_START = 13;
+const PAYWALL_PRICES = { lite: 0.99, upgrade: 3.9, pro: 4.9 };
+const UPGRADE_KEY = 'soccer_profile_upgrade_pending';
+const LITE_LOCK_KEY = 'soccer_profile_lite_lock';
 
 let questions = null;
 let quizItems = [];
@@ -108,14 +112,142 @@ const ARCHETYPE_CARD_PROFILES = {
   F5_CF: { family: 'striker', theme: 'legendGold', artCode: 'F5', artWord: 'PHENOM' },
 };
 
-const CARD_ART_VERSION = '2025061017';
+const CARD_ART_VERSION = '2025061218';
+
+/** 高频中性原型：匹配后 A/B 版球星卡随机二选一，增加视觉多样性 */
+const CARD_ART_VARIANT_POOL = {
+  F3_RO: 'F3_RO_B',
+  F3_CTR: 'F3_CTR_B',
+  F3_CAR: 'F3_CAR_B',
+  F3_B2B: 'F3_B2B_B',
+  F5_PO: 'F5_PO_B',
+  F5_TG: 'F5_TG_B',
+  F4_IN: 'F4_IN_B',
+  F2_SW: 'F2_SW_B',
+};
+
+function getCardArtUrl(assetId) {
+  return `./assets/scout-cards/${assetId}.png?v=${CARD_ART_VERSION}`;
+}
 
 const CARD_ART_ASSETS = Object.fromEntries(
-  Object.keys(ARCHETYPE_CARD_PROFILES).map((id) => [
-    id,
-    `./assets/scout-cards/${id}.png?v=${CARD_ART_VERSION}`,
-  ]),
+  Object.keys(ARCHETYPE_CARD_PROFILES).map((id) => [id, getCardArtUrl(id)]),
 );
+
+function getLitePrimaryLock() {
+  try {
+    const raw = localStorage.getItem(LITE_LOCK_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function embedLockFields(data) {
+  if (!data?.archetype_id) return data;
+  data.locked_primary_id = data.locked_primary_id || data.archetype_id;
+  data.locked_card_art_asset_id =
+    data.locked_card_art_asset_id || data.card_art_asset_id || data.archetype_id;
+  data.locked_card_variant = data.locked_card_variant || data.card_art_variant || 'A';
+  return data;
+}
+
+function saveLitePrimaryLock(data) {
+  if (!data?.archetype_id) return;
+  embedLockFields(data);
+  localStorage.setItem(
+    LITE_LOCK_KEY,
+    JSON.stringify({
+      primary_archetype_id: data.locked_primary_id || data.archetype_id,
+      archetype_title: data.archetype_title,
+      card_art_asset_id: data.locked_card_art_asset_id || data.card_art_asset_id || data.archetype_id,
+      card_art_variant: data.locked_card_variant || data.card_art_variant || 'A',
+    }),
+  );
+}
+
+function shouldPreserveCardLock(data) {
+  return Boolean(
+    data?.primary_locked ||
+    data?.locked_primary_id ||
+    data?.locked_card_art_asset_id ||
+    getLitePrimaryLock()?.primary_archetype_id,
+  );
+}
+
+function applyLiteUpgradeContinuity(data) {
+  if (!data) return data;
+  const lock = getLitePrimaryLock();
+  const primaryId = lock?.primary_archetype_id || data.locked_primary_id;
+  const cardArt = lock?.card_art_asset_id || data.locked_card_art_asset_id;
+  const cardVariant = lock?.card_art_variant || data.locked_card_variant;
+  if (!primaryId && !cardArt) return data;
+
+  data.primary_locked = true;
+  if (primaryId) {
+    data.locked_primary_id = primaryId;
+    data.archetype_id = primaryId;
+    if (lock?.archetype_title) data.archetype_title = lock.archetype_title;
+  }
+  if (cardArt) {
+    data.locked_card_art_asset_id = cardArt;
+    data.card_art_asset_id = cardArt;
+  }
+  if (cardVariant) {
+    data.locked_card_variant = cardVariant;
+    data.card_art_variant = cardVariant;
+  }
+  return data;
+}
+
+function ensureLitePrimaryLock() {
+  if (getLitePrimaryLock()?.primary_archetype_id) return true;
+  try {
+    const cached = localStorage.getItem(REPORT_KEY);
+    if (!cached) return false;
+    const data = JSON.parse(cached);
+    const primaryId = data.locked_primary_id || data.archetype_id;
+    if (primaryId && (data.report_tier === 'lite' || data.locked_card_art_asset_id)) {
+      saveLitePrimaryLock({
+        archetype_id: primaryId,
+        archetype_title: data.archetype_title,
+        card_art_asset_id: data.locked_card_art_asset_id || data.card_art_asset_id || primaryId,
+        card_art_variant: data.locked_card_variant || data.card_art_variant || 'A',
+        locked_primary_id: primaryId,
+        locked_card_art_asset_id: data.locked_card_art_asset_id || data.card_art_asset_id || primaryId,
+        locked_card_variant: data.locked_card_variant || data.card_art_variant || 'A',
+      });
+      return true;
+    }
+  } catch {
+    return false;
+  }
+  return false;
+}
+
+/** 为报告锁定一张球星卡素材（同次测试内保持一致） */
+function assignCardArtVariant(data, options = {}) {
+  if (!data?.archetype_id) return data;
+  if (options.preserveLiteLock || shouldPreserveCardLock(data)) {
+    return applyLiteUpgradeContinuity(data);
+  }
+  const altId = CARD_ART_VARIANT_POOL[data.archetype_id];
+  if (!altId || data.card_art_asset_id) return data;
+  const useAlt = Math.random() < 0.5;
+  data.card_art_asset_id = useAlt ? altId : data.archetype_id;
+  data.card_art_variant = useAlt ? 'B' : 'A';
+  embedLockFields(data);
+  return data;
+}
+
+function resolveCardArtAssetId(data) {
+  if (shouldPreserveCardLock(data)) {
+    applyLiteUpgradeContinuity(data);
+  } else if (!data?.card_art_asset_id) {
+    assignCardArtVariant(data);
+  }
+  return data?.card_art_asset_id || data?.archetype_id || 'F3_B2B';
+}
 
 const CARD_RENDER_TARGETS = {
   main: {
@@ -205,36 +337,26 @@ function pickDefaultOptionKey(question) {
   return middle?.key ?? options[0].key;
 }
 
-/** 球迷版仅答 10 题，提交前为后端计分补齐中性默认项 */
-function fillLitePayload(payload) {
-  const filled = {
-    q0: [...(payload.q0 || [])],
-    style: [...payload.style],
-    intensity: [...payload.intensity],
-    literacy: [...payload.literacy],
-  };
+function buildUpgradeQuizItems() {
+  const allItems = buildAllQuizItems();
+  const styleEnd = 1 + questions.style.length;
+  quizItems = [
+    ...allItems.slice(1 + LITE_STYLE_COUNT, styleEnd),
+    ...allItems.slice(styleEnd),
+  ];
+}
 
-  for (let i = LITE_STYLE_COUNT; i < questions.style.length; i += 1) {
-    if (filled.style[i] == null || filled.style[i] === '') {
-      const opts = questions.style[i]?.options || [];
-      const fallback = opts.find((o) => o.key === 'C') || opts[0];
-      filled.style[i] = fallback?.key ?? null;
-    }
-  }
+function isLiteReportMode(mode = quizMode) {
+  return mode === 'lite';
+}
 
-  questions.intensity.forEach((q, i) => {
-    if (filled.intensity[i] == null || filled.intensity[i] === '') {
-      filled.intensity[i] = pickDefaultOptionKey(q);
-    }
-  });
+/** 报告展示仅以 report_tier 为准，避免 upgrade 流程与直接 Pro 版版式不一致 */
+function isLiteReportData(data) {
+  return data?.report_tier === 'lite';
+}
 
-  questions.literacy.forEach((q, i) => {
-    if (filled.literacy[i] == null || filled.literacy[i] === '') {
-      filled.literacy[i] = pickDefaultOptionKey(q);
-    }
-  });
-
-  return filled;
+function isUpgradePending() {
+  return localStorage.getItem(UPGRADE_KEY) === '1';
 }
 
 function resetQuizSession() {
@@ -300,12 +422,23 @@ function setAnswerForItem(item, value) {
 }
 
 function buildSubmitPayload() {
-  return {
+  const payload = {
     q0: [...(answers.q0 || [])],
     style: questions.style.map((q) => answers.map[q.id] ?? null),
     intensity: questions.intensity.map((q) => answers.map[q.id] ?? null),
     literacy: questions.literacy.map((q) => answers.map[q.id] ?? null),
   };
+  if (quizMode === 'lite') {
+    payload.report_tier = 'lite';
+  }
+  if (quizMode === 'upgrade') {
+    payload.report_tier = 'pro';
+    const lock = getLitePrimaryLock();
+    if (lock?.primary_archetype_id) {
+      payload.locked_primary_id = lock.primary_archetype_id;
+    }
+  }
+  return payload;
 }
 
 function findFirstUnansweredIndex() {
@@ -350,6 +483,29 @@ function validateSubmitPayload(payload, mode = quizMode) {
     return null;
   }
 
+  if (mode === 'upgrade') {
+    for (let i = LITE_STYLE_COUNT; i < questions.style.length; i += 1) {
+      if (payload.style[i] == null || payload.style[i] === '') {
+        return `风格题未完成，请完成剩余 Part1 题目（P${i + 1}）`;
+      }
+    }
+    const upgradeChecks = [
+      ['intensity', '强度', questions.intensity.length],
+      ['literacy', '素养', questions.literacy.length],
+    ];
+    for (const [key, label, expected] of upgradeChecks) {
+      const list = payload[key];
+      let answered = 0;
+      for (let i = 0; i < expected; i += 1) {
+        if (list[i] != null && list[i] !== '') answered += 1;
+      }
+      if (answered < expected) {
+        return `${label}题未完成（${answered}/${expected}）`;
+      }
+    }
+    return null;
+  }
+
   const checks = [
     ['style', '风格', questions.style.length],
     ['intensity', '强度', questions.intensity.length],
@@ -382,17 +538,33 @@ function formatIntensityOptionLabel(label) {
     .trim();
 }
 
+function getQuestionDisplayNumber(index = currentIndex) {
+  if (quizMode === 'upgrade') {
+    return UPGRADE_QUESTION_START + index;
+  }
+  return index + 1;
+}
+
+function getQuestionDisplayTotal() {
+  if (quizMode === 'upgrade') {
+    return FULL_QUIZ_COUNT;
+  }
+  return quizItems.length;
+}
+
 function renderQuestion() {
   const item = quizItems[currentIndex];
   const q = item.data;
   const total = quizItems.length;
+  const displayNum = getQuestionDisplayNumber();
+  const displayTotal = getQuestionDisplayTotal();
 
-  $('progress-bar').style.width = `${((currentIndex + 1) / total) * 100}%`;
-  $('progress-text').textContent = `${currentIndex + 1} / ${total}`;
+  $('progress-bar').style.width = `${(displayNum / displayTotal) * 100}%`;
+  $('progress-text').textContent = `${displayNum} / ${displayTotal}`;
   $('part-badge').textContent = item.part;
 
   const wm = $('question-watermark');
-  if (wm) wm.textContent = String(currentIndex + 1).padStart(2, '0');
+  if (wm) wm.textContent = String(displayNum).padStart(2, '0');
 
   const prefix = q.id ? `${q.id}. ` : '';
   const titleText = q.text || (item.answerKey === 'q0' ? '你最常踢的位置是？（多选，最多2项）' : '');
@@ -505,19 +677,23 @@ function prevQuestion() {
 
 async function submitQuiz() {
   let payload = buildSubmitPayload();
-  const validationError = validateSubmitPayload(payload, quizMode);
+  const submitMode = quizMode === 'upgrade' ? 'upgrade' : quizMode;
+  const validationError = validateSubmitPayload(payload, submitMode);
   if (validationError) {
     alert(`${validationError}\n\n已跳转到第一道未完成的题目。`);
     gotoFirstUnanswered();
     return;
   }
 
-  if (quizMode === 'lite') {
-    payload = fillLitePayload(payload);
+  if (quizMode === 'upgrade') {
+    payload.report_tier = 'pro';
   }
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   localStorage.setItem(MODE_KEY, quizMode);
+  if (quizMode === 'upgrade') {
+    localStorage.setItem(UPGRADE_KEY, '1');
+  }
   showStep('step-loading');
 
   let msgIdx = 0;
@@ -526,15 +702,38 @@ async function submitQuiz() {
     $('loading-msg').textContent = LOADING_MSGS[msgIdx];
   }, 1200);
 
+  if (!window.SoccerAPI?.submitAnswers) {
+    clearInterval(msgTimer);
+    alert(
+      '页面资源加载不完整（API 模块未就绪）。\n\n请完全关闭页面后重新打开，或在浏览器中选择「强制刷新」后再试。'
+    );
+    showStep('step-quiz');
+    return;
+  }
+
   try {
     const minLoading = new Promise((resolve) => setTimeout(resolve, 2600));
     const [result] = await Promise.all([
       window.SoccerAPI.submitAnswers(payload),
       minLoading,
     ]);
-    reportData = result;
+    if (quizMode === 'lite') {
+      reportData = assignCardArtVariant(result);
+      embedLockFields(reportData);
+      saveLitePrimaryLock(reportData);
+    } else if (quizMode === 'upgrade') {
+      result.report_tier = 'pro';
+      reportData = assignCardArtVariant(result, { preserveLiteLock: true });
+      embedLockFields(reportData);
+    } else {
+      reportData = assignCardArtVariant(result);
+    }
     localStorage.setItem(REPORT_KEY, JSON.stringify(reportData));
     clearInterval(msgTimer);
+    if (quizMode === 'upgrade') {
+      localStorage.setItem(MODE_KEY, 'upgrade');
+      localStorage.setItem(UPGRADE_KEY, '1');
+    }
     showPaywallPreview(reportData);
     showStep('step-paywall');
   } catch (err) {
@@ -551,14 +750,44 @@ async function submitQuiz() {
 
 function showPaywallPreview(data) {
   $('preview-title').textContent = data.archetype_title || '已匹配原型';
-  $('preview-score').textContent = `PlayLevel · ${Number(data.playlevel_score ?? 0).toFixed(2)}`;
   const storedMode = localStorage.getItem(MODE_KEY);
-  if (storedMode === 'lite' || storedMode === 'pro') {
+  if (storedMode === 'lite' || storedMode === 'pro' || storedMode === 'upgrade') {
     quizMode = storedMode;
   }
-  const price = PAYWALL_PRICES[quizMode] ?? PAYWALL_PRICES.pro;
+
+  const isLite = isLiteReportData(data);
+  const isUpgrade = !isLite && (quizMode === 'upgrade' || isUpgradePending());
+  $('preview-score').textContent = isLite
+    ? `Style Match · ${Math.round(data?.hybrid_percentage || 100)}%`
+    : `PlayLevel · ${Number(data.playlevel_score ?? 0).toFixed(2)}`;
+
+  const price = isUpgrade
+    ? PAYWALL_PRICES.upgrade
+    : PAYWALL_PRICES[quizMode] ?? PAYWALL_PRICES.pro;
   const priceEl = $('paywall-price');
   if (priceEl) priceEl.textContent = `¥${price}`;
+
+  const titleEl = $('paywall-title');
+  const descEl = $('paywall-desc');
+  const noteEl = $('paywall-note');
+  const unlockBtn = $('btn-unlock');
+  if (isLite) {
+    if (titleEl) titleEl.textContent = '解锁球迷版报告';
+    if (descEl) descEl.textContent = '含专属球星卡、风格星图、核心解析与前两条训练建议';
+    if (noteEl) noteEl.textContent = '一次解锁 · 可升级完整版';
+    if (unlockBtn) unlockBtn.textContent = '解锁球迷版报告';
+  } else if (isUpgrade) {
+    if (titleEl) titleEl.textContent = '解锁完整版报告';
+    if (descEl) descEl.textContent = '含十二维雷达、球探五维、短板深拆与风格参照系';
+    if (noteEl) noteEl.textContent = '补差价解锁 · 永久查看';
+    if (unlockBtn) unlockBtn.textContent = '解锁完整版报告';
+    localStorage.removeItem(UPGRADE_KEY);
+  } else {
+    if (titleEl) titleEl.textContent = '解锁完整报告';
+    if (descEl) descEl.textContent = '含雷达图、深度解析、强度分析、训练建议与风格参照系';
+    if (noteEl) noteEl.textContent = '一次解锁 · 永久查看';
+    if (unlockBtn) unlockBtn.textContent = '解锁我的报告';
+  }
 }
 
 function getCardVariant(data) {
@@ -702,18 +931,24 @@ function buildSilhouetteSvg(archetypeId, variant) {
   `;
 }
 
-function renderPlayerCard(data, targetKey = 'main') {
+function renderPlayerCard(data, targetKey = 'main', options = {}) {
   const target = CARD_RENDER_TARGETS[targetKey] || CARD_RENDER_TARGETS.main;
+  if (shouldPreserveCardLock(data)) {
+    applyLiteUpgradeContinuity(data);
+  } else {
+    assignCardArtVariant(data);
+  }
   const archetypeId = data?.archetype_id || 'F3_B2B';
   const profile = ARCHETYPE_CARD_PROFILES[archetypeId] || ARCHETYPE_CARD_PROFILES.F3_B2B;
   const copy = data?.copy_data || {};
+  const liteCard = options.liteCard ?? isLiteReportData(data);
   const rating = Math.round(Number(data?.playlevel_score || 0) * 10);
   const fields = target.fields;
 
   setCardText(fields.archetypeId, archetypeId);
-  setCardText(fields.rating, String(rating).padStart(2, '0'));
+  setCardText(fields.rating, liteCard ? '--' : String(rating).padStart(2, '0'));
   setCardText(fields.title, data?.archetype_title || copy.title || '未知原型');
-  setCardText(fields.playlevel, Number(data?.playlevel_score || 0).toFixed(2));
+  setCardText(fields.playlevel, liteCard ? '--' : Number(data?.playlevel_score || 0).toFixed(2));
   setCardText(fields.match, `${Math.round(data?.hybrid_percentage || 100)}%`);
   setCardText(
     fields.tagline,
@@ -726,7 +961,7 @@ function renderPlayerCard(data, targetKey = 'main') {
   const cardRadar = target.radar ? $(target.radar) : null;
   if (!card || !illustration || !fallback) return false;
 
-  card.className = `player-card${targetKey === 'share' ? ' share-player-card' : ''} family-${profile.family} is-reveal`;
+  card.className = `player-card${targetKey === 'share' ? ' share-player-card' : ''} family-${profile.family} is-reveal${liteCard ? ' is-lite-card' : ''}`;
   card.classList.remove('has-art');
   card.dataset.archetype = archetypeId;
   card.style.removeProperty('--card-shield-mask');
@@ -740,7 +975,8 @@ function renderPlayerCard(data, targetKey = 'main') {
   illustration.classList.add('hidden');
   illustration.removeAttribute('src');
   illustration.removeAttribute('crossorigin');
-  const artUrl = CARD_ART_ASSETS[archetypeId];
+  const artAssetId = resolveCardArtAssetId(data);
+  const artUrl = getCardArtUrl(artAssetId);
   illustration.onload = () => {
     illustration.classList.remove('hidden');
     fallback.classList.add('hidden');
@@ -842,7 +1078,10 @@ function openSharedReport(data) {
 
 function openUnlockedReport(data) {
   isSharedView = false;
-  if (!renderPlayerCard(data)) return;
+  if (shouldPreserveCardLock(data)) applyLiteUpgradeContinuity(data);
+  const lite = isLiteReportData(data);
+  setLiteReportLayout(lite);
+  if (!renderPlayerCard(data, 'main', { liteCard: lite })) return;
   setSharedViewUI(false);
   window.SoccerShare?.applyReport(data);
   setReportFooterMode('owner');
@@ -852,7 +1091,9 @@ function openUnlockedReport(data) {
 }
 
 function expandReportSections() {
-  if (!reportData || reportExpanded) return;
+  if (!reportData) return;
+  if (reportExpanded) return;
+  if (shouldPreserveCardLock(reportData)) applyLiteUpgradeContinuity(reportData);
   renderReport(reportData);
   reportExpanded = true;
   const body = $('report-body');
@@ -959,14 +1200,41 @@ function renderScoutProfile(profile) {
   });
 }
 
+function setLiteReportLayout(active) {
+  const body = $('report-body');
+  const upgradeWrap = $('report-upgrade-wrap');
+  const premiumSections = $('report-premium-sections');
+  const caption = $('radar-caption');
+  body?.classList.toggle('is-lite', active);
+  upgradeWrap?.classList.toggle('hidden', !active);
+  premiumSections?.classList.toggle('is-locked', active);
+  if (caption) {
+    caption.textContent = active
+      ? '已测维度显示参考分 · 未测维度已高斯模糊'
+      : '亮色 = 你的主踢位置族 · 灰色 = 其他位置参考维度';
+  }
+}
+
 function renderReport(data) {
   const copy = data.copy_data || {};
+  const lite = isLiteReportData(data);
+  setLiteReportLayout(lite);
+
   $('report-title').textContent = copy.title || data.archetype_title;
   $('report-tagline').textContent = copy.tagline || '';
-  $('badge-intensity').textContent =
-    (copy.intensity_suffix || '') + ' · ' + (copy.intensity_label || data.intensity_band);
-  $('badge-literacy').textContent = copy.literacy_tag || data.literacy_band;
-  animatePlayLevel(data.playlevel_score, $('playlevel-value'));
+  const labelEl = $('report-label');
+  if (labelEl) {
+    labelEl.textContent = data.primary_locked
+      ? '你的足球 DNA · 主原型已确认'
+      : '你的足球 DNA';
+  }
+
+  if (!lite) {
+    $('badge-intensity').textContent =
+      (copy.intensity_suffix || '') + ' · ' + (copy.intensity_label || data.intensity_band);
+    $('badge-literacy').textContent = copy.literacy_tag || data.literacy_band;
+    animatePlayLevel(data.playlevel_score, $('playlevel-value'));
+  }
 
   drawRadarChart($('radar-canvas'), data.radar_data);
   renderRadarLegend(data.radar_data, data.q0_positions);
@@ -1021,7 +1289,8 @@ function renderReport(data) {
           .filter(Boolean)
           .map((text) => ({ tag: '风格专项', text }));
 
-  trainingItems.forEach((item) => {
+  const visibleTraining = lite ? trainingItems.slice(0, 2) : trainingItems;
+  visibleTraining.forEach((item) => {
     const li = document.createElement('li');
     if (item.tag) {
       const tag = document.createElement('span');
@@ -1086,7 +1355,63 @@ function unlockReport() {
     alert('暂无报告数据');
     return;
   }
+  if (isLiteReportData(reportData)) {
+    assignCardArtVariant(reportData);
+    embedLockFields(reportData);
+    saveLitePrimaryLock(reportData);
+    localStorage.setItem(REPORT_KEY, JSON.stringify(reportData));
+  } else if (reportData.report_tier === 'pro' || quizMode === 'upgrade' || isUpgradePending()) {
+    reportData.report_tier = 'pro';
+    if (shouldPreserveCardLock(reportData)) applyLiteUpgradeContinuity(reportData);
+    quizMode = 'pro';
+    localStorage.setItem(MODE_KEY, 'pro');
+    localStorage.removeItem(UPGRADE_KEY);
+    localStorage.setItem(REPORT_KEY, JSON.stringify(reportData));
+  }
   openUnlockedReport(reportData);
+}
+
+function startUpgradeQuiz() {
+  if (!questions) {
+    alert('题库尚未加载完成，请刷新页面后重试');
+    return;
+  }
+  if (!ensureLitePrimaryLock()) {
+    alert('未找到球迷版主原型锁定记录，请重新完成球迷版测试');
+    return;
+  }
+  const cachedAnswers = localStorage.getItem(STORAGE_KEY);
+  if (!cachedAnswers) {
+    alert('未找到球迷版答题记录，请重新测试');
+    return;
+  }
+  try {
+    const payload = JSON.parse(cachedAnswers);
+    answers.q0 = [...(payload.q0 || [])];
+    answers.map = {};
+    questions.style.forEach((q, i) => {
+      if (payload.style[i]) answers.map[q.id] = payload.style[i];
+    });
+    questions.intensity.forEach((q, i) => {
+      if (payload.intensity[i]) answers.map[q.id] = payload.intensity[i];
+    });
+    questions.literacy.forEach((q, i) => {
+      if (payload.literacy[i]) answers.map[q.id] = payload.literacy[i];
+    });
+  } catch (err) {
+    console.error(err);
+    alert('答题记录损坏，请重新测试');
+    return;
+  }
+
+  quizMode = 'upgrade';
+  localStorage.setItem(MODE_KEY, 'upgrade');
+  localStorage.setItem(UPGRADE_KEY, '1');
+  currentIndex = 0;
+  isAdvancingQuiz = false;
+  buildUpgradeQuizItems();
+  showStep('step-quiz');
+  renderQuestion();
 }
 
 function shareReport() {
@@ -1120,7 +1445,10 @@ function restart() {
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem(REPORT_KEY);
   localStorage.removeItem(MODE_KEY);
+  localStorage.removeItem(UPGRADE_KEY);
+  localStorage.removeItem(LITE_LOCK_KEY);
   setSharedViewUI(false);
+  setLiteReportLayout(false);
   setReportFooterMode('owner');
   const cleanUrl = location.origin + location.pathname;
   if (location.href.split('#')[0] !== cleanUrl) {
@@ -1151,6 +1479,7 @@ async function init() {
   $('btn-next').addEventListener('click', nextQuestion);
   $('btn-prev').addEventListener('click', prevQuestion);
   $('btn-unlock').addEventListener('click', unlockReport);
+  $('btn-upgrade-pro')?.addEventListener('click', startUpgradeQuiz);
   $('btn-view-report').addEventListener('click', expandReportSections);
   $('btn-share').addEventListener('click', shareReport);
   $('btn-restart').addEventListener('click', restart);
@@ -1185,8 +1514,12 @@ async function init() {
 
 window.SoccerCard = {
   renderPlayerCard,
+  assignCardArtVariant,
+  resolveCardArtAssetId,
+  getCardArtUrl,
   ARCHETYPE_CARD_PROFILES,
   CARD_ART_ASSETS,
+  CARD_ART_VARIANT_POOL,
   CARD_THEME_PRESETS,
 };
 

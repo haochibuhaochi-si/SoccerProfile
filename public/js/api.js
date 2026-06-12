@@ -41,7 +41,7 @@ async function getApp() {
 
 /**
  * 提交答案并获取报告
- * @param {{ q0: string[], style: string[], intensity: string[], literacy: string[] }} payload
+ * @param {{ q0: string[], style: string[], intensity: string[], literacy: string[], report_tier?: 'lite'|'pro', locked_primary_id?: string }} payload
  */
 async function submitAnswers(payload) {
   const app = await getApp();
@@ -86,9 +86,9 @@ async function uploadShareImage(blob, archetypeId) {
   if (!fileId) throw new Error('图片上传失败');
 
   const urlRes = await app.getTempFileURL({ fileList: [fileId] });
-  const file = urlRes?.fileList?.[0];
-  if (!file?.tempFileURL) throw new Error('获取分享图链接失败');
-  return file.tempFileURL;
+  const urlFile = urlRes?.fileList?.[0];
+  if (!urlFile?.tempFileURL) throw new Error('获取分享图链接失败');
+  return urlFile.tempFileURL;
 }
 
 window.SoccerAPI = { submitAnswers, CLOUD_ENV_ID, getApp, uploadShareImage };

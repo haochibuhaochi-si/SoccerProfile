@@ -279,38 +279,27 @@
     },
     {
       "id": "P6",
-      "text": "对方防线压得很上，你在本方半场拿球，最好的选择是？",
+      "text": "背身拿球，对方后卫紧贴着你，你会？",
       "options": [
         {
           "key": "A",
-          "label": "回传给门将或中卫，重新组织（安全）",
+          "label": "倚住他，护球等待队友（支点）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F2-Distribution",
-              "delta": -1
+              "axis": "F5-HoldUp",
+              "delta": 1
             }
           ]
         },
         {
           "key": "B",
-          "label": "长传找到前插的边锋或直接转移弱侧（穿透）",
+          "label": "转身摆脱，尝试突破（灵活）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F2-Distribution",
-              "delta": 1
-            }
-          ]
-        },
-        {
-          "key": "C",
-          "label": "带球向前，压缩对方空间并进入更靠前区域（前压）",
-          "tags": [
-            {
-              "type": "axis",
-              "axis": "F3-Territory",
-              "delta": 1
+              "axis": "F5-HoldUp",
+              "delta": -1
             }
           ]
         }
@@ -370,47 +359,37 @@
     },
     {
       "id": "P8",
-      "text": "你在边路中前场拿球，面前有空间，你会？",
+      "text": "你主罚点球，你更可能？",
       "options": [
         {
           "key": "A",
-          "label": "沿边线加速，准备下底或传中（贴边）",
+          "label": "大力抽射死角（力量）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F4-Mode",
-              "delta": -1
-            },
-            {
-              "type": "axis",
-              "axis": "F4-Width",
-              "delta": -1
+              "axis": "F5-Physical",
+              "delta": 1
             }
           ]
         },
         {
           "key": "B",
-          "label": "先内切一步，看射门、塞肋部或继续推进（内切）",
+          "label": "勺子点球或推角度（技巧）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F4-Mode",
-              "delta": 1
-            },
-            {
-              "type": "axis",
-              "axis": "F4-Width",
+              "axis": "F5-Physical",
               "delta": 1
             }
           ]
         },
         {
           "key": "C",
-          "label": "回传后再换边或重新组织（稳）",
+          "label": "观察门将重心后低平球打反方向（嗅觉/预判）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F4-Mode",
+              "axis": "F5-Physical",
               "delta": -1
             }
           ]
@@ -661,27 +640,38 @@
     },
     {
       "id": "P16",
-      "text": "背身拿球，对方后卫紧贴着你，你会？",
+      "text": "对方防线压得很上，你在本方半场拿球，最好的选择是？",
       "options": [
         {
           "key": "A",
-          "label": "倚住他，护球等待队友（支点）",
+          "label": "回传给门将或中卫，重新组织（安全）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F5-HoldUp",
-              "delta": 1
+              "axis": "F2-Distribution",
+              "delta": -1
             }
           ]
         },
         {
           "key": "B",
-          "label": "转身摆脱，尝试突破（灵活）",
+          "label": "长传找到前插的边锋或直接转移弱侧（穿透）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F5-HoldUp",
-              "delta": -1
+              "axis": "F2-Distribution",
+              "delta": 1
+            }
+          ]
+        },
+        {
+          "key": "C",
+          "label": "带球向前，压缩对方空间并进入更靠前区域（前压）",
+          "tags": [
+            {
+              "type": "axis",
+              "axis": "F3-Territory",
+              "delta": 1
             }
           ]
         }
@@ -724,37 +714,47 @@
     },
     {
       "id": "P18",
-      "text": "你主罚点球，你更可能？",
+      "text": "你在边路中前场拿球，面前有空间，你会？",
       "options": [
         {
           "key": "A",
-          "label": "大力抽射死角（力量）",
+          "label": "沿边线加速，准备下底或传中（贴边）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F5-Physical",
-              "delta": 1
+              "axis": "F4-Mode",
+              "delta": -1
+            },
+            {
+              "type": "axis",
+              "axis": "F4-Width",
+              "delta": -1
             }
           ]
         },
         {
           "key": "B",
-          "label": "勺子点球或推角度（技巧）",
+          "label": "先内切一步，看射门、塞肋部或继续推进（内切）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F5-Physical",
+              "axis": "F4-Mode",
+              "delta": 1
+            },
+            {
+              "type": "axis",
+              "axis": "F4-Width",
               "delta": 1
             }
           ]
         },
         {
           "key": "C",
-          "label": "观察门将重心后低平球打反方向（嗅觉/预判）",
+          "label": "回传后再换边或重新组织（稳）",
           "tags": [
             {
               "type": "axis",
-              "axis": "F5-Physical",
+              "axis": "F4-Mode",
               "delta": -1
             }
           ]

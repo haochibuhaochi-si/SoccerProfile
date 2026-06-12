@@ -23,9 +23,18 @@
     return new URL(path.replace(/^\.\//, ''), base).href;
   }
 
-  function shareCardImage(archetypeId) {
-    const id = archetypeId || 'F3_B2B';
-    return absoluteUrl(`./assets/scout-cards/${id}.png?v=${SHARE_CARD_VERSION}`);
+  function shareCardImage(reportDataOrId) {
+    const reportData =
+      typeof reportDataOrId === 'object' && reportDataOrId
+        ? reportDataOrId
+        : { archetype_id: reportDataOrId || 'F3_B2B' };
+    const assetId =
+      window.SoccerCard?.resolveCardArtAssetId?.(reportData) ||
+      reportData.card_art_asset_id ||
+      reportData.archetype_id ||
+      'F3_B2B';
+    const version = window.SoccerCard?.CARD_ART_VERSION || SHARE_CARD_VERSION;
+    return absoluteUrl(`./assets/scout-cards/${assetId}.png?v=${version}`);
   }
 
   function buildShareLink(reportData) {
@@ -46,7 +55,7 @@
     const tagline = copy.tagline || '35 道题读懂你的球风、强度与战术素养';
     const desc = `我的足球 DNA：${title} · PlayLevel ${playlevel} · ${tagline}`;
     const link = buildShareLink(reportData);
-    const imgUrl = shareCardImage(archetypeId);
+    const imgUrl = shareCardImage(reportData);
 
     return {
       archetypeId,
